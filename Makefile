@@ -1,13 +1,14 @@
-TARGETS := github.com/joshk/hustle
+HUSTLE_PACKAGE := github.com/joshk/hustle
+TARGETS := $(HUSTLE_PACKAGE)
 
-VERSION_VAR := github.com/joshk/hustle.VersionString
+VERSION_VAR := $(HUSTLE_PACKAGE).VersionString
 REPO_VERSION := $(shell git describe --always --dirty --tags)
 
-REV_VAR := github.com/joshk/hustle.RevisionString
+REV_VAR := $(HUSTLE_PACKAGE).RevisionString
 REPO_REV := $(shell git rev-parse --sq HEAD)
 
 GO_TAG_ARGS ?= -tags full
-TAGS_VAR := github.com/joshk/hustle.BuildTags
+TAGS_VAR := $(HUSTLE_PACKAGE).BuildTags
 GOBUILD_LDFLAGS := -ldflags "-X $(VERSION_VAR) $(REPO_VERSION) -X $(REV_VAR) $(REPO_REV) -X $(TAGS_VAR) '$(GO_TAG_ARGS)' "
 
 ADDR := :8661
@@ -22,9 +23,9 @@ build: deps
 	go build -o $${GOPATH%%:*}/bin/hustle-server $(GOBUILD_LDFLAGS) $(GO_TAG_ARGS) ./hustle-server
 
 deps:
-	if [ ! -e $${GOPATH%%:*}/src/github.com/joshk/hustle ] ; then \
+	if [ ! -e $${GOPATH%%:*}/src/$(HUSTLE_PACKAGE) ] ; then \
 		mkdir -p $${GOPATH%%:*}/src/github.com/joshk ; \
-		ln -sv $(PWD) $${GOPATH%%:*}/src/github.com/joshk/hustle ; \
+		ln -sv $(PWD) $${GOPATH%%:*}/src/$(HUSTLE_PACKAGE) ; \
 	fi
 	go get -x $(TARGETS)
 

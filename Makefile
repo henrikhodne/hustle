@@ -22,7 +22,7 @@ build: deps
 	go install $(GOBUILD_LDFLAGS) $(GO_TAG_ARGS) -x $(TARGETS)
 	go build -o $${GOPATH%%:*}/bin/hustle-server $(GOBUILD_LDFLAGS) $(GO_TAG_ARGS) ./hustle-server
 
-deps:
+deps: public/pusher.js public/pusher.min.js
 	if [ ! -e $${GOPATH%%:*}/src/$(HUSTLE_PACKAGE) ] ; then \
 		mkdir -p $${GOPATH%%:*}/src/github.com/joshk ; \
 		ln -sv $(PWD) $${GOPATH%%:*}/src/$(HUSTLE_PACKAGE) ; \
@@ -40,5 +40,11 @@ fmtpolice:
 
 serve:
 	$${GOPATH%%:*}/bin/hustle-server -a $(ADDR)
+
+public/pusher.js:
+	curl -s -L -o $@ http://js.pusher.com/2.1/pusher.js
+
+public/pusher.min.js:
+	curl -s -L -o $@ http://js.pusher.com/2.1/pusher.min.js
 
 .PHONY: all build clean deps serve test fmtpolice

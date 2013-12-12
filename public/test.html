@@ -2,19 +2,27 @@
 <html>
   <head>
     <title>hustle test</title>
-    <script src="http://js.pusher.com/2.1/pusher.min.js"></script>
+    <script src="pusher.min.js"></script>
   </head>
   <body>
     <h1>hustle test</h1>
     <script>
-    Pusher.host = '0.0.0.0';
-    Pusher.ws_port = '8966';
-    Pusher.wss_port = '8966';
+    var pusher = new Pusher('foo', {
+      wsHost: 'localhost',
+      wsPort: '8663',
+      wssPort: '8664',
+      httpHost: 'localhost',
+      httpPort: '8661',
+      httpsPort: '8662',
+      httpPath: '/pusher',
+      statsHost: 'localhost',
+      authEndpoint: '/pusher/auth',
+      authTransport: 'ajax'
+    }), channel;
+
     Pusher.log = function (data) {
       console.log('\t\t', data);
     };
-
-    var pusher = new Pusher('foo'), channel;
 
     pusher.bind('pusher:error', function (data) {
       alert(data.message);

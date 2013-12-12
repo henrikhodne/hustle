@@ -26,6 +26,7 @@ deps:
 		mkdir -p $${GOPATH%%:*}/src/github.com/joshk ; \
 		ln -sv $(PWD) $${GOPATH%%:*}/src/github.com/joshk/hustle ; \
 	fi
+	go get -x $(TARGETS)
 
 clean:
 	go clean -x $(TARGETS) || true

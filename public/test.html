@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>hustle test</title>
+    <script src="http://js.pusher.com/2.1/pusher.min.js"></script>
+  </head>
+  <body>
+    <h1>hustle test</h1>
+    <script>
+    Pusher.host = '0.0.0.0';
+    Pusher.ws_port = '8966';
+    Pusher.wss_port = '8966';
+    Pusher.log = function (data) {
+      console.log('\t\t', data);
+    };
+
+    var pusher = new Pusher('foo'), channel;
+
+    pusher.bind('pusher:error', function (data) {
+      alert(data.message);
+    });
+
+    channel = pusher.subscribe('bar');
+    channel.bind('an_event', function(data) {
+      document.body.setAttribute(
+        'style', 'background-color: ' + data.color + ';'
+      )
+    });
+    </script>
+  </body>
+</html>

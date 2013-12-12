@@ -22,7 +22,7 @@ build: deps
 	go build -o $${GOPATH%%:*}/bin/hustle-server $(GOBUILD_LDFLAGS) $(GO_TAG_ARGS) ./hustle-server
 
 deps:
-	if [ ! -L $${GOPATH%%:*}/src/github.com/joshk/hustle ] ; then \
+	if [ ! -e $${GOPATH%%:*}/src/github.com/joshk/hustle ] ; then \
 		mkdir -p $${GOPATH%%:*}/src/github.com/joshk ; \
 		ln -sv $(PWD) $${GOPATH%%:*}/src/github.com/joshk/hustle ; \
 	fi

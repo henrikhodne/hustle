@@ -10,5 +10,6 @@ Vagrant.configure('2') do |config|
   config.vm.network :forwarded_port, guest: 8966, host: 8966,
                                      auto_correct: true
 
+  config.vm.synced_folder '.', '/gopath/src/github.com/joshk/hustle'
   config.vm.provision :shell, path: '.vagrant-provision.sh'
 end

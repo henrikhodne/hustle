@@ -7,7 +7,7 @@ Vagrant.configure('2') do |config|
                       'current/precise-server-cloudimg-amd64-vagrant-disk1.box'
 
   config.vm.network :private_network, ip: '33.33.33.10', auto_correct: true
-  config.vm.network :forwarded_port, guest: 8966, host: 8966,
+  config.vm.network :forwarded_port, guest: 8661, host: 8661,
                                      auto_correct: true
 
   config.vm.synced_folder '.', '/gopath/src/github.com/joshk/hustle'

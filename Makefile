@@ -1,5 +1,5 @@
 HUSTLE_PACKAGE := github.com/joshk/hustle
-TARGETS := $(HUSTLE_PACKAGE)
+TARGETS := $(HUSTLE_PACKAGE) $(HUSTLE_PACKAGE)/hustle-server
 
 VERSION_VAR := $(HUSTLE_PACKAGE).VersionString
 REPO_VERSION := $(shell git describe --always --dirty --tags)
@@ -11,7 +11,9 @@ GO_TAG_ARGS ?= -tags full
 TAGS_VAR := $(HUSTLE_PACKAGE).BuildTags
 GOBUILD_LDFLAGS := -ldflags "-X $(VERSION_VAR) $(REPO_VERSION) -X $(REV_VAR) $(REPO_REV) -X $(TAGS_VAR) '$(GO_TAG_ARGS)' "
 
-ADDR := :8661
+HUSTLE_HTTPADDR ?= :8661
+HUSTLE_WSADDR ?= :8663
+HUSTLE_STATSADDR ?= :8665
 
 all: clean test
 
@@ -20,7 +22,6 @@ test: build fmtpolice
 
 build: deps
 	go install $(GOBUILD_LDFLAGS) $(GO_TAG_ARGS) -x $(TARGETS)
-	go build -o $${GOPATH%%:*}/bin/hustle-server $(GOBUILD_LDFLAGS) $(GO_TAG_ARGS) ./hustle-server
 
 deps: public/pusher.js public/pusher.min.js
 	if [ ! -e $${GOPATH%%:*}/src/$(HUSTLE_PACKAGE) ] ; then \
@@ -39,7 +40,10 @@ fmtpolice:
 	set -e; for f in $(shell git ls-files '*.go'); do gofmt $$f | diff -u $$f - ; done
 
 serve:
-	$${GOPATH%%:*}/bin/hustle-server -a $(ADDR)
+	$${GOPATH%%:*}/bin/hustle-server \
+	  -http-addr=$(HUSTLE_HTTPADDR) \
+	  -ws-addr=$(HUSTLE_WSADDR) \
+	  -stats-addr=$(HUSTLE_STATSADDR)
 
 public/pusher.js:
 	curl -s -L -o $@ http://js.pusher.com/2.1/pusher.js

@@ -4,7 +4,7 @@ set -e
 set -x
 
 apt-get update -yq
-apt-get install -yq build-essential curl git mercurial
+apt-get install -yq build-essential curl git mercurial screen
 
 cp -v /vagrant/.vagrant-skel/etc-default-docker /etc/default/docker
 

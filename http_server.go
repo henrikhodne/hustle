@@ -1,7 +1,9 @@
 package hustle
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"log"
 	"math/rand"
 	"net/http"
@@ -10,24 +12,48 @@ import (
 	"github.com/codegangsta/martini-contrib/render"
 )
 
-// HTTPServerMain is the whole shebang for the HTTP, mannn
-func HTTPServerMain(addr string) {
-	m := martini.Classic()
-	m.Use(render.Renderer())
-	m.Use(martini.Logger())
-
-	m.Get(`/pusher/info`, getPusherInfo)
-
-	m.Post(`/apps/:app_id/events`, createAppEvents)
-	m.Get(`/apps/:app_id/channels`, getAppChannels)
-	m.Get(`/apps/:app_id/channels/:channel_name`, getAppChannel)
-	m.Get(`/apps/:app_id/channels/:channel_name/users`, getAppChannelUsers)
-
-	log.Printf("hustle-server HTTP listening at %s\n", addr)
-	log.Fatal(http.ListenAndServe(addr, m))
+type httpServer struct {
+	addr string
+	m    *martini.ClassicMartini
 }
 
-func getPusherInfo() string {
+// HTTPServerMain is the whole shebang for the HTTP, mannn
+func HTTPServerMain(addr string, ) {
+	srv := newHTTPServer(addr)
+	srv.Listen()
+}
+
+func newHTTPServer(addr string) *httpServer {
+	return &httpServer{
+		addr: addr,
+		m:    martini.Classic(),
+	}
+}
+
+func (srv *httpServer) Listen() {
+	srv.setupMiddleware()
+	srv.setupRoutes()
+	log.Printf("hustle-server HTTP listening at %s\n", srv.addr)
+	log.Fatal(http.ListenAndServe(srv.addr, srv.m))
+}
+
+func (srv *httpServer) setupMiddleware() {
+	srv.m.Use(render.Renderer())
+	srv.m.Use(martini.Logger())
+}
+
+func (srv *httpServer) setupRoutes() {
+	srv.m.Get(`/pusher/info`, srv.getPusherInfo)
+	srv.m.Post(`/pusher/**`, srv.createUnknownThing)
+
+	srv.m.Post(`/apps/:app_id/events`, srv.createAppEvents)
+	srv.m.Get(`/apps/:app_id/channels`, srv.getAppChannels)
+	srv.m.Get(`/apps/:app_id/channels/:channel_name`, srv.getAppChannel)
+	srv.m.Post(`/apps/:app_id/channels/:channel_name/events`, srv.createAppChannelEvents)
+	srv.m.Get(`/apps/:app_id/channels/:channel_name/users`, srv.getAppChannelUsers)
+}
+
+func (srv *httpServer) getPusherInfo() string {
 	return fmt.Sprintf(`{
 	"hostname": "localhost",
 	"websocket": false,
@@ -38,18 +64,38 @@ func getPusherInfo() string {
   }`, rand.Int())
 }
 
-func getAppChannels() string {
+func (srv *httpServer) getAppChannels() string {
 	return `{"channels": {}}`
 }
 
-func getAppChannel() string {
+func (srv *httpServer) getAppChannel() string {
 	return `{}`
 }
 
-func getAppChannelUsers() string {
+func (srv *httpServer) getAppChannelUsers() string {
 	return `{"users": []}`
 }
 
-func createAppEvents() string {
+func (srv *httpServer) createAppEvents(req *http.Request) string {
+	dumpRequest(req)
 	return `{}`
+}
+
+func (srv *httpServer) createAppChannelEvents(req *http.Request) string {
+	dumpRequest(req)
+	return `{}`
+}
+
+func (srv *httpServer) createUnknownThing(r render.Render, req *http.Request) {
+	dumpRequest(req)
+	r.JSON(200, req)
+}
+
+func dumpRequest(req *http.Request) {
+	if req != nil {
+		log.Printf("request: %#v\n", req)
+		var body bytes.Buffer
+		io.Copy(&body, req.Body)
+		log.Printf("body: %s\n", string(body.Bytes()))
+	}
 }

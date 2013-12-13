@@ -13,7 +13,8 @@ import (
 type configSpec struct {
 	HTTPAddr string
 	// HTTPSAddr string
-	WSAddr string
+	HubAddr string
+	WSAddr  string
 	// WSSAddr   string
 	StatsAddr string
 }
@@ -22,7 +23,8 @@ var (
 	config = &configSpec{
 		HTTPAddr: ":8661",
 		// HTTPSAddr: ":8662",
-		WSAddr: ":8663",
+		HubAddr: ":6379",
+		WSAddr:  ":8663",
 		// WSSAddr:   ":8664",
 		StatsAddr: ":8665",
 	}
@@ -34,6 +36,7 @@ var (
 
 func init() {
 	flag.StringVar(&config.HTTPAddr, "http-addr", config.HTTPAddr, "HTTP Server address")
+	flag.StringVar(&config.HubAddr, "hub-addr", config.HubAddr, "Redis Hub address")
 	flag.StringVar(&config.WSAddr, "ws-addr", config.WSAddr, "WS Server address")
 	flag.StringVar(&config.StatsAddr, "stats-addr", config.StatsAddr, "Stats Server address")
 }
@@ -63,8 +66,8 @@ func main() {
 
 	quit := make(chan bool)
 
-	go hustle.HTTPServerMain(config.HTTPAddr)
-	go hustle.WSServerMain(config.WSAddr)
+	go hustle.HTTPServerMain(config.HTTPAddr, config.HubAddr)
+	go hustle.WSServerMain(config.WSAddr, config.HubAddr)
 	go hustle.StatsServerMain(config.StatsAddr)
 
 	<-quit

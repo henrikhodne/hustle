@@ -9,25 +9,35 @@ import (
 	"net/http"
 
 	"github.com/codegangsta/martini"
+	"github.com/codegangsta/martini-contrib/binding"
 	"github.com/codegangsta/martini-contrib/render"
 )
 
 type httpServer struct {
 	addr string
 	m    *martini.ClassicMartini
+	h    *hub
 }
 
 // HTTPServerMain is the whole shebang for the HTTP, mannn
-func HTTPServerMain(addr string, ) {
-	srv := newHTTPServer(addr)
+func HTTPServerMain(addr string, hubAddr string) {
+	srv, err := newHTTPServer(addr, hubAddr)
+	if err != nil {
+		log.Panicf("oh well: %v\n", err)
+	}
 	srv.Listen()
 }
 
-func newHTTPServer(addr string) *httpServer {
+func newHTTPServer(addr, hubAddr string) (*httpServer, error) {
+	h, err := newHub(hubAddr)
+	if err != nil {
+		return nil, err
+	}
 	return &httpServer{
 		addr: addr,
 		m:    martini.Classic(),
-	}
+		h:    h,
+	}, nil
 }
 
 func (srv *httpServer) Listen() {
@@ -46,7 +56,7 @@ func (srv *httpServer) setupRoutes() {
 	srv.m.Get(`/pusher/info`, srv.getPusherInfo)
 	srv.m.Post(`/pusher/**`, srv.createUnknownThing)
 
-	srv.m.Post(`/apps/:app_id/events`, srv.createAppEvents)
+	srv.m.Post(`/apps/:app_id/events`, binding.Json(Event{}), srv.createAppEvents)
 	srv.m.Get(`/apps/:app_id/channels`, srv.getAppChannels)
 	srv.m.Get(`/apps/:app_id/channels/:channel_name`, srv.getAppChannel)
 	srv.m.Post(`/apps/:app_id/channels/:channel_name/events`, srv.createAppChannelEvents)
@@ -76,8 +86,21 @@ func (srv *httpServer) getAppChannelUsers() string {
 	return `{"users": []}`
 }
 
-func (srv *httpServer) createAppEvents(req *http.Request) string {
-	dumpRequest(req)
+func (srv *httpServer) createAppEvents(evt Event, err binding.Errors, resp http.ResponseWriter, req *http.Request) string {
+	if err.Count() > 0 {
+		resp.WriteHeader(http.StatusBadRequest)
+		return fmt.Sprintf(`{"errors":"%v"}`, err)
+	}
+	socketID := req.URL.Query().Get("socket_id")
+	log.Printf("received event: %#v\n", evt)
+	for _, channel := range evt.Channels {
+		_, pubErr := srv.h.PublishEvent(channel, evt.Name, socketID, evt.Data)
+		if pubErr != nil {
+			resp.WriteHeader(http.StatusInternalServerError)
+			return `{}`
+		}
+	}
+	resp.WriteHeader(http.StatusAccepted)
 	return `{}`
 }
 
@@ -89,6 +112,9 @@ func (srv *httpServer) createAppChannelEvents(req *http.Request) string {
 func (srv *httpServer) createUnknownThing(r render.Render, req *http.Request) {
 	dumpRequest(req)
 	r.JSON(200, req)
+}
+
+func (srv *httpServer) publishEvent(channel, name string, data []byte) {
 }
 
 func dumpRequest(req *http.Request) {

@@ -9,6 +9,8 @@ import (
 )
 
 type wsServer struct {
+	addr        string
+	h           *hub
 	errChan     chan error
 	doneChan    chan bool
 	messages    []*wsMessage
@@ -19,18 +21,27 @@ type wsServer struct {
 }
 
 // WSServerMain is the whole shebang for Web Sockets
-func WSServerMain(addr string) {
+func WSServerMain(addr, hubAddr string) {
 	//m := martini.Classic()
 	//m.Use(martini.Logger())
 
 	//m.Get(`/app/:app_id`, websocket.Handler(serveWs))
 
-	srv := newWsServer()
-	srv.Listen(addr)
+	srv, err := newWsServer(addr, hubAddr)
+	if err != nil {
+		log.Panicf("oh well: %v\n", err)
+	}
+	srv.Listen()
 }
 
-func newWsServer() *wsServer {
-	srv := &wsServer{
+func newWsServer(addr, hubAddr string) (*wsServer, error) {
+	h, err := newHub(hubAddr)
+	if err != nil {
+		return nil, err
+	}
+	return &wsServer{
+		addr:        addr,
+		h:           h,
 		errChan:     make(chan error),
 		doneChan:    make(chan bool),
 		messages:    []*wsMessage{},
@@ -38,10 +49,51 @@ func newWsServer() *wsServer {
 		addChan:     make(chan *wsClient),
 		delChan:     make(chan *wsClient),
 		sendAllChan: make(chan *wsMessage),
-	}
-	return srv
+	}, nil
 }
 
+func (srv *wsServer) Listen() {
+	onConnected := func(ws *websocket.Conn) {
+		defer func() {
+			err := ws.Close()
+			if err != nil {
+				srv.errChan <- err
+			}
+		}()
+
+		client := &wsClient{ws: ws, srv: srv}
+		srv.Add(client)
+		client.Listen()
+	}
+
+	http.Handle(`/`, websocket.Handler(onConnected))
+
+	go func() {
+		log.Printf("hustle-server WS listening at %s\n", srv.addr)
+		log.Fatal(http.ListenAndServe(srv.addr, nil))
+	}()
+
+	for {
+		select {
+		case c := <-srv.addChan:
+			srv.clients[c.id] = c
+			log.Printf("Added client %d\n", c.id)
+			log.Printf("%d clients connected\n", len(srv.clients))
+			srv.sendPastMessages(c)
+		case c := <-srv.delChan:
+			delete(srv.clients, c.id)
+			log.Printf("Deleted client %d\n", c.id)
+		case msg := <-srv.sendAllChan:
+			log.Println("Send all:", msg)
+			srv.messages = append(srv.messages, msg)
+			srv.sendAll(msg)
+		case err := <-srv.errChan:
+			log.Println("Error: ", err.Error())
+		case <-srv.doneChan:
+			return
+		}
+	}
+}
 func (srv *wsServer) Add(c *wsClient) {
 	srv.addChan <- c
 }
@@ -71,48 +123,5 @@ func (srv *wsServer) sendPastMessages(c *wsClient) {
 func (srv *wsServer) sendAll(msg *wsMessage) {
 	for _, c := range srv.clients {
 		c.Write(msg)
-	}
-}
-
-func (srv *wsServer) Listen(addr string) {
-	onConnected := func(ws *websocket.Conn) {
-		defer func() {
-			err := ws.Close()
-			if err != nil {
-				srv.errChan <- err
-			}
-		}()
-
-		client := &wsClient{ws: ws, srv: srv}
-		srv.Add(client)
-		client.Listen()
-	}
-
-	http.Handle(`/`, websocket.Handler(onConnected))
-
-	go func() {
-		log.Printf("hustle-server WS listening at %s\n", addr)
-		log.Fatal(http.ListenAndServe(addr, nil))
-	}()
-
-	for {
-		select {
-		case c := <-srv.addChan:
-			srv.clients[c.id] = c
-			log.Printf("Added client %d\n", c.id)
-			log.Printf("%d clients connected\n", len(srv.clients))
-			srv.sendPastMessages(c)
-		case c := <-srv.delChan:
-			delete(srv.clients, c.id)
-			log.Printf("Deleted client %d\n", c.id)
-		case msg := <-srv.sendAllChan:
-			log.Println("Send all:", msg)
-			srv.messages = append(srv.messages, msg)
-			srv.sendAll(msg)
-		case err := <-srv.errChan:
-			log.Println("Error: ", err.Error())
-		case <-srv.doneChan:
-			return
-		}
 	}
 }

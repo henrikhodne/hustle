@@ -1,0 +1,20 @@
+{
+	"ImportPath": "github.com/joshk/hustle",
+	"GoVersion": "go1.2",
+	"Deps": [
+		{
+			"ImportPath": "github.com/codegangsta/inject",
+			"Rev": "07b1cf5ecdb5134a1f79a0efd22900feb306fc31"
+		},
+		{
+			"ImportPath": "github.com/codegangsta/martini",
+			"Comment": "v0.1-13-g6f2168e",
+			"Rev": "6f2168ebc296c3a7698a5929378a9d68b04b7a12"
+		},
+		{
+			"ImportPath": "github.com/codegangsta/martini-contrib/render",
+			"Comment": "v0.1-33-g9e2ccb8",
+			"Rev": "9e2ccb8ed9db1d45b22e3f552f69253b51b1e869"
+		}
+	]
+}

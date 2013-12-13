@@ -1,0 +1,5 @@
+#!bash
+
+test -f ~/.profile && source ~/.profile
+
+alias activate-hustle='cd /gopath/src/github.com/joshk/hustle'

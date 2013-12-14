@@ -22,7 +22,9 @@ type wsClient struct {
 	srv  *wsServer
 	subs map[string]string
 
-	doneChan chan bool
+	inMsgChan  chan *wsMessage
+	outMsgChan chan *wsMessage
+	doneChan   chan bool
 }
 
 type wsErrMsg struct {
@@ -53,9 +55,77 @@ func newClient(ws *websocket.Conn, h *hub, srv *wsServer) *wsClient {
 }
 
 func (c *wsClient) Listen() {
-	// FIXME: do stuff here, mkay?
-	<-c.doneChan
+	log.Printf("client %d listening\n", c.id)
+	go c.channelizeIncomingMessages()
+	go c.channelizeOutgoingMessages()
+	go c.listenIncoming()
+	c.listenOutgoing()
 }
+
+func (c *wsClient) listenIncoming() {
+	log.Printf("client %d listening for incoming messages\n", c.id)
+	for {
+		select {
+		case <-c.doneChan:
+			return
+		case msg := <-c.inMsgChan:
+			switch msg.Event {
+			case "pusher_ping":
+				c.pusherPing(msg)
+			case "pusher_pong":
+				c.pusherPong(msg)
+			case "pusher_subscribe":
+				c.pusherSubscribe(msg)
+			case "pusher_unsubscribe":
+				c.pusherUnsubscribe(msg)
+			}
+		}
+	}
+}
+
+func (c *wsClient) channelizeIncomingMessages() {
+	log.Printf("client %d setting up incoming message channel\n", c.id)
+	for {
+		select {
+		case <-c.doneChan:
+			return
+		}
+
+		msg := newWsMessage()
+		log.Printf("client %d waiting to receive from %v\n", c.id, c.ws)
+		websocket.JSON.Receive(c.ws, msg)
+		log.Printf("client %d received message %#v\n", c.id, msg)
+		c.inMsgChan <- msg
+	}
+}
+
+func (c *wsClient) listenOutgoing() {
+	log.Printf("client %d listening for outgoing messages\n", c.id)
+	for {
+		select {
+		case <-c.doneChan:
+			return
+		}
+	}
+}
+
+func (c *wsClient) channelizeOutgoingMessages() {
+	log.Printf("client %d setting up outgoing message channel\n", c.id)
+	for {
+		select {
+		case <-c.doneChan:
+			return
+		case msg := <-c.outMsgChan:
+			websocket.JSON.Send(c.ws, msg)
+		}
+	}
+}
+
+func (c *wsClient) pusherPing(msg *wsMessage) {
+	c.sendPayload("", "pusher:pong", nil)
+}
+
+func (c *wsClient) pusherPong(msg *wsMessage) {}
 
 func (c *wsClient) pusherSubscribe(msg *wsMessage) {
 	channelID := msg.Data.Channel
@@ -65,6 +135,8 @@ func (c *wsClient) pusherSubscribe(msg *wsMessage) {
 	}
 
 	c.subs[channelID] = newWsSubscription(c.ws, c.h, msg).Subscribe()
+	log.Printf("client %d subscribed to %s with subscription ID %s\n",
+		c.id, channelID, c.subs[channelID])
 }
 
 func (c *wsClient) pusherUnsubscribe(msg *wsMessage) {
@@ -83,4 +155,12 @@ func (c *wsClient) pusherUnsubscribe(msg *wsMessage) {
 
 func (c *wsClient) sendError(code int, message string) {
 	websocket.JSON.Send(c.ws, &wsErrMsg{code, message})
+}
+
+func (c *wsClient) sendPayload(channel, event string, payload interface{}) {
+	websocket.JSON.Send(c.ws, &eventPayload{
+		Event:   event,
+		Data:    payload,
+		Channel: channel,
+	})
 }

@@ -8,15 +8,13 @@ import (
 )
 
 type wsServer struct {
-	cfg         *Config
-	h           *hub
-	errChan     chan error
-	doneChan    chan bool
-	messages    []*wsMessage
-	clients     map[int]*wsClient
-	addChan     chan *wsClient
-	delChan     chan *wsClient
-	sendAllChan chan *wsMessage
+	cfg      *Config
+	h        *hub
+	errChan  chan error
+	doneChan chan bool
+	clients  map[int]*wsClient
+	addChan  chan *wsClient
+	delChan  chan *wsClient
 }
 
 // WSServerMain is the whole shebang for Web Sockets
@@ -39,15 +37,13 @@ func newWsServer(cfg *Config) (*wsServer, error) {
 		return nil, err
 	}
 	return &wsServer{
-		cfg:         cfg,
-		h:           h,
-		errChan:     make(chan error),
-		doneChan:    make(chan bool),
-		messages:    []*wsMessage{},
-		clients:     make(map[int]*wsClient),
-		addChan:     make(chan *wsClient),
-		delChan:     make(chan *wsClient),
-		sendAllChan: make(chan *wsMessage),
+		cfg:      cfg,
+		h:        h,
+		errChan:  make(chan error),
+		doneChan: make(chan bool),
+		clients:  make(map[int]*wsClient),
+		addChan:  make(chan *wsClient),
+		delChan:  make(chan *wsClient),
 	}, nil
 }
 
@@ -61,6 +57,7 @@ func (srv *wsServer) Listen() {
 		}()
 
 		client := newClient(ws, srv.h, srv)
+		log.Printf("adding client %d to server map", client.id)
 		srv.Add(client)
 		client.Listen()
 	}

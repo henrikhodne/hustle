@@ -4,7 +4,11 @@ set -e
 set -x
 
 apt-get update -yq
-apt-get install -yq build-essential curl git mercurial screen
+apt-get install -yq curl python-software-properties
+
+apt-add-repository -y ppa:nginx/development
+
+apt-get install -yq build-essential git mercurial screen byobu nginx
 
 cp -v /vagrant/.vagrant-skel/etc-default-docker /etc/default/docker
 
@@ -36,5 +40,12 @@ if ! which shoreman ; then
   curl -s -L -o /usr/local/bin/shoreman https://raw.github.com/hecticjeff/shoreman/master/shoreman.sh
   chmod +x /usr/local/bin/shoreman
 fi
+
+service nginx stop
+
+ln -svf /vagrant/.vagrant-skel/nginx.conf /etc/nginx/nginx.conf
+rm -vf /etc/nginx/sites-enabled/hustle
+
+service nginx start
 
 su - vagrant -c /vagrant/.vagrant-provision-as-vagrant.sh

@@ -5,11 +5,10 @@ import (
 	"net/http"
 
 	"code.google.com/p/go.net/websocket"
-	//"github.com/codegangsta/martini"
 )
 
 type wsServer struct {
-	addr        string
+	cfg         *Config
 	h           *hub
 	errChan     chan error
 	doneChan    chan bool
@@ -21,26 +20,26 @@ type wsServer struct {
 }
 
 // WSServerMain is the whole shebang for Web Sockets
-func WSServerMain(addr, hubAddr string) {
-	//m := martini.Classic()
-	//m.Use(martini.Logger())
+func WSServerMain(cfg *Config) {
+	if cfg == nil {
+		log.Panic("cfg cannot be nil")
+	}
 
-	//m.Get(`/app/:app_id`, websocket.Handler(serveWs))
-
-	srv, err := newWsServer(addr, hubAddr)
+	srv, err := newWsServer(cfg)
 	if err != nil {
 		log.Panicf("oh well: %v\n", err)
 	}
+
 	srv.Listen()
 }
 
-func newWsServer(addr, hubAddr string) (*wsServer, error) {
-	h, err := newHub(hubAddr)
+func newWsServer(cfg *Config) (*wsServer, error) {
+	h, err := newHub(cfg.HubAddr)
 	if err != nil {
 		return nil, err
 	}
 	return &wsServer{
-		addr:        addr,
+		cfg:         cfg,
 		h:           h,
 		errChan:     make(chan error),
 		doneChan:    make(chan bool),
@@ -69,8 +68,8 @@ func (srv *wsServer) Listen() {
 	http.Handle(`/`, websocket.Handler(onConnected))
 
 	go func() {
-		log.Printf("hustle-server WS listening at %s\n", srv.addr)
-		log.Fatal(http.ListenAndServe(srv.addr, nil))
+		log.Printf("hustle-server WS listening at %s\n", srv.cfg.WSAddr)
+		log.Fatal(http.ListenAndServe(srv.cfg.WSAddr, nil))
 	}()
 
 	for {

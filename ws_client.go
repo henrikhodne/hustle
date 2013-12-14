@@ -1,7 +1,6 @@
 package hustle
 
 import (
-	//"bytes"
 	"fmt"
 	"io"
 	"log"
@@ -18,12 +17,19 @@ var (
 )
 
 type wsClient struct {
-	id  int
-	ws  *websocket.Conn
-	srv *wsServer
-	ch  chan *wsMessage
+	id   int
+	ws   *websocket.Conn
+	h    *hub
+	srv  *wsServer
+	ch   chan *wsMessage
+	subs map[string]string
 
 	doneChan chan bool
+}
+
+type wsErrMsg struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
 }
 
 func newClient(ws *websocket.Conn, srv *wsServer) *wsClient {
@@ -67,7 +73,7 @@ func (c *wsClient) Listen() {
 }
 
 func (c *wsClient) listenWrite() {
-	log.Printf("client %d listening for writes\n", c.id)
+	log.Printf("client %d listening for outgoing messages\n", c.id)
 
 	for {
 		select {
@@ -84,7 +90,7 @@ func (c *wsClient) listenWrite() {
 }
 
 func (c *wsClient) listenRead() {
-	log.Printf("client %d listening for reads\n", c.id)
+	log.Printf("client %d listening for incoming messages\n", c.id)
 	for {
 		select {
 		case <-c.doneChan:
@@ -94,26 +100,44 @@ func (c *wsClient) listenRead() {
 			return
 		default:
 			log.Printf("client %d reading from ws\n", c.id)
-			var msg wsMessage
-			err := websocket.JSON.Receive(c.ws, &msg)
+			msg := newWsMessage()
+			err := websocket.JSON.Receive(c.ws, msg)
 			if err == io.EOF {
 				log.Printf("client %d hit EOF, sending `done`\n", c.id)
 				c.doneChan <- true
 			} else if err != nil {
 				c.srv.Err(err)
 			} else {
-				c.srv.SendAll(&msg)
+				c.srv.SendAll(msg)
 			}
 		}
 	}
 }
 
-//req := c.ws.Request()
-//if req != nil {
-//log.Printf("serveWs request: %#v\n", req)
-//log.Printf("serveWs request URL: %#v\n", req.URL)
-//}
-//var outbuf bytes.Buffer
-//out := io.MultiWriter(c.ws, &outbuf)
-//io.Copy(out, c.ws)
-//log.Printf("serveWs received: %#v\n", string(outbuf.Bytes()))
+func (c *wsClient) pusherSubscribe(msg *wsMessage) {
+	channelID := msg.Data.Channel
+	if _, ok := c.subs[channelID]; ok {
+		c.sendError(-1,
+			fmt.Sprintf("Existing subscription to channel %s", channelID))
+	}
+
+	c.subs[channelID] = newWsSubscription(c.ws, c.h, msg).Subscribe()
+}
+
+func (c *wsClient) pusherUnsubscribe(msg *wsMessage) {
+	var (
+		subsID string
+		ok     bool
+	)
+
+	channelID := msg.Data.Channel
+	if subsID, ok = c.subs[channelID]; ok {
+		delete(c.subs, channelID)
+	}
+
+	c.h.Unsubscribe(subsID)
+}
+
+func (c *wsClient) sendError(code int, message string) {
+	websocket.JSON.Send(c.ws, &wsErrMsg{code, message})
+}

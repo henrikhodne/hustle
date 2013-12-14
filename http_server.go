@@ -1,9 +1,7 @@
 package hustle
 
 import (
-	"bytes"
 	"fmt"
-	"io"
 	"log"
 	"math/rand"
 	"net/http"
@@ -116,6 +114,7 @@ func (srv *httpServer) createAppEvents(evt Event, err binding.Errors, resp http.
 	for _, payload := range evt.Payloads(socketID) {
 		_, pubErr := srv.h.PublishEvent(payload)
 		if pubErr != nil {
+			log.Printf("ERROR: %v\n", pubErr)
 			resp.WriteHeader(http.StatusInternalServerError)
 			return `{}`
 		}
@@ -125,23 +124,9 @@ func (srv *httpServer) createAppEvents(evt Event, err binding.Errors, resp http.
 }
 
 func (srv *httpServer) createAppChannelEvents(req *http.Request) string {
-	dumpRequest(req)
 	return `{}`
 }
 
 func (srv *httpServer) createUnknownThing(r render.Render, req *http.Request) {
-	dumpRequest(req)
 	r.JSON(200, req)
-}
-
-func (srv *httpServer) publishEvent(channel, name string, data []byte) {
-}
-
-func dumpRequest(req *http.Request) {
-	if req != nil {
-		log.Printf("request: %#v\n", req)
-		var body bytes.Buffer
-		io.Copy(&body, req.Body)
-		log.Printf("body: %s\n", string(body.Bytes()))
-	}
 }

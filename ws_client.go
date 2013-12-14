@@ -59,6 +59,9 @@ func (c *wsClient) Listen() {
 	go c.channelizeIncomingMessages()
 	go c.channelizeOutgoingMessages()
 	go c.listenIncoming()
+	c.sendPayload("", "pusher:connection_established", &eventPayload{
+		SocketID: fmt.Sprintf("%v", c.id),
+	})
 	c.listenOutgoing()
 }
 
@@ -137,6 +140,7 @@ func (c *wsClient) pusherSubscribe(msg *wsMessage) {
 	c.subs[channelID] = newWsSubscription(c.ws, c.h, msg).Subscribe()
 	log.Printf("client %d subscribed to %s with subscription ID %s\n",
 		c.id, channelID, c.subs[channelID])
+	c.sendPayload(channelID, "pusher_internal:subscription_succeeded", nil)
 }
 
 func (c *wsClient) pusherUnsubscribe(msg *wsMessage) {

@@ -1,7 +1,7 @@
 <h1>hustle test</h1>
 <script src="pusher.min.js"></script>
 <script>
-var pusher = new Pusher('foo', {
+var pusher = new Pusher('test_app', {
   wsHost: '{{ .WSPubHost }}',
   wsPort: '{{ .WSPubPort }}',
   // wssPort: '???',
@@ -12,7 +12,7 @@ var pusher = new Pusher('foo', {
   statsHost: '{{ .StatsPubAddr }}',
   authEndpoint: '/pusher/auth',
   authTransport: 'ajax'
-}), channel;
+}), channel, color;
 
 Pusher.log = function (data) {
   console.log('\t\t', data);
@@ -22,10 +22,21 @@ pusher.bind('pusher:error', function (data) {
   alert(data.message);
 });
 
-channel = pusher.subscribe('bar');
-channel.bind('an_event', function(data) {
+channel = pusher.subscribe('MY_CHANNEL');
+channel.bind('client-disco-fun', function(data) {
   document.body.setAttribute(
     'style', 'background-color: ' + data.color + ';'
   )
 });
+
+setInterval(function() {
+  color = (Math.random() * 16777216).toString(16).replace(/\..*/, '')
+  console.log('\t\tspammy! ' + color);
+  try {
+    channel.trigger('client-disco-fun', { color: color });
+  } catch(e) {
+    console.log('error: %o', e);
+  }
+}, 300);
+
 </script>

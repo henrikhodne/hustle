@@ -3,6 +3,7 @@ package hustle
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"code.google.com/p/go.net/websocket"
 )
@@ -56,8 +57,6 @@ func newClient(ws *websocket.Conn, h *hub, srv *wsServer) *wsClient {
 
 func (c *wsClient) Listen() {
 	log.Printf("client %d listening\n", c.id)
-	go c.channelizeIncomingMessages()
-	go c.channelizeOutgoingMessages()
 	go c.listenIncoming()
 	c.sendPayload("", "pusher:connection_established", &eventPayload{
 		SocketID: fmt.Sprintf("%v", c.id),
@@ -68,59 +67,31 @@ func (c *wsClient) Listen() {
 func (c *wsClient) listenIncoming() {
 	log.Printf("client %d listening for incoming messages\n", c.id)
 	for {
-		select {
-		case <-c.doneChan:
-			return
-		case msg := <-c.inMsgChan:
+		msg := newWsMessage()
+		websocket.JSON.Receive(c.ws, msg)
+		log.Printf("client %d received message %#v\n", c.id, msg)
+		if strings.HasPrefix(msg.Event, "client-") {
+			c.publishClientEvent(msg)
+		} else {
 			switch msg.Event {
-			case "pusher_ping":
+			case "pusher:ping":
 				c.pusherPing(msg)
-			case "pusher_pong":
+			case "pusher:pong":
 				c.pusherPong(msg)
-			case "pusher_subscribe":
+			case "pusher:subscribe":
 				c.pusherSubscribe(msg)
-			case "pusher_unsubscribe":
+			case "pusher:unsubscribe":
 				c.pusherUnsubscribe(msg)
 			}
 		}
 	}
 }
 
-func (c *wsClient) channelizeIncomingMessages() {
-	log.Printf("client %d setting up incoming message channel\n", c.id)
-	for {
-		select {
-		case <-c.doneChan:
-			return
-		}
-
-		msg := newWsMessage()
-		log.Printf("client %d waiting to receive from %v\n", c.id, c.ws)
-		websocket.JSON.Receive(c.ws, msg)
-		log.Printf("client %d received message %#v\n", c.id, msg)
-		c.inMsgChan <- msg
-	}
-}
-
 func (c *wsClient) listenOutgoing() {
 	log.Printf("client %d listening for outgoing messages\n", c.id)
 	for {
-		select {
-		case <-c.doneChan:
-			return
-		}
-	}
-}
-
-func (c *wsClient) channelizeOutgoingMessages() {
-	log.Printf("client %d setting up outgoing message channel\n", c.id)
-	for {
-		select {
-		case <-c.doneChan:
-			return
-		case msg := <-c.outMsgChan:
-			websocket.JSON.Send(c.ws, msg)
-		}
+		msg := <-c.outMsgChan
+		websocket.JSON.Send(c.ws, msg)
 	}
 }
 
@@ -166,5 +137,15 @@ func (c *wsClient) sendPayload(channel, event string, payload interface{}) {
 		Event:   event,
 		Data:    payload,
 		Channel: channel,
+	})
+}
+
+func (c *wsClient) publishClientEvent(msg *wsMessage) {
+	log.Printf("publishing client event %#v\n", msg)
+	c.h.PublishEvent(&eventPayload{
+		Event:    msg.Event,
+		Channel:  msg.Data.Channel,
+		SocketID: msg.SocketID,
+		Data:     msg.Data.ChannelData,
 	})
 }

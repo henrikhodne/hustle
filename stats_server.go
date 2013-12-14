@@ -21,6 +21,6 @@ func StatsServerMain(cfg *Config) {
 	log.Fatal(http.ListenAndServe(cfg.StatsAddr, m))
 }
 
-func handleStatsJSONP() string {
-	return ""
+func handleStatsJSONP(r render.Render) {
+	r.JSON(200, map[string]string{})
 }

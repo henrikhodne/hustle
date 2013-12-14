@@ -29,7 +29,7 @@ func newHub(addr string) (*hub, error) {
 }
 
 func (h *hub) PublishEvent(ep *eventPayload) (interface{}, error) {
-	log.Printf("hub publishing event %v to channel %v\n", ep, ep.Channel)
+	log.Printf("hub publishing event %#v to channel %q\n", ep, ep.Channel)
 	payloadBytes, err := json.Marshal(ep)
 	if err != nil {
 		return nil, err

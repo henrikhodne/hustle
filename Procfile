@@ -1,1 +1,2 @@
-web: hustle-server -a :$PORT
+web: hustle-server
+redis: redis-server

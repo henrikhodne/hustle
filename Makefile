@@ -28,7 +28,7 @@ deps: public/pusher.js public/pusher.min.js
 		mkdir -p $${GOPATH%%:*}/src/github.com/joshk ; \
 		ln -sv $(PWD) $${GOPATH%%:*}/src/$(HUSTLE_PACKAGE) ; \
 	fi
-	go get -x $(TARGETS)
+	go get $(GOBUILD_LDFLAGS) $(GO_TAG_ARGS) -x $(TARGETS)
 
 clean:
 	go clean -x $(TARGETS) || true
@@ -40,7 +40,7 @@ fmtpolice:
 	set -e; for f in $(shell git ls-files '*.go'); do gofmt $$f | diff -u $$f - ; done
 
 serve:
-	$${GOPATH%%:*}/bin/hustle-server \
+	exec $${GOPATH%%:*}/bin/hustle-server \
 	  -http-addr=$(HUSTLE_HTTPADDR) \
 	  -ws-addr=$(HUSTLE_WSADDR) \
 	  -stats-addr=$(HUSTLE_STATSADDR)

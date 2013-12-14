@@ -58,7 +58,10 @@ func (srv *httpServer) Listen() {
 }
 
 func (srv *httpServer) setupMiddleware() {
-	srv.m.Use(render.Renderer())
+	srv.m.Use(render.Renderer(render.Options{
+		Directory: "templates",
+		Layout:    "layout",
+	}))
 	srv.m.Use(martini.Logger())
 	srv.m.Use(CORSAllowAny())
 }

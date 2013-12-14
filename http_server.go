@@ -32,7 +32,7 @@ type pusherInfo struct {
 func HTTPServerMain(cfg *Config) {
 	srv, err := newHTTPServer(cfg)
 	if err != nil {
-		log.Panicf("oh well: %v\n", err)
+		log.Fatalf("oh well: %v\n", err)
 	}
 	srv.Listen()
 }

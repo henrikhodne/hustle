@@ -27,7 +27,7 @@ func WSServerMain(cfg *Config) {
 
 	srv, err := newWsServer(cfg)
 	if err != nil {
-		log.Panicf("oh well: %v\n", err)
+		log.Fatalf("oh well: %v\n", err)
 	}
 
 	srv.Listen()
@@ -60,7 +60,7 @@ func (srv *wsServer) Listen() {
 			}
 		}()
 
-		client := &wsClient{ws: ws, srv: srv}
+		client := newClient(ws, srv.h, srv)
 		srv.Add(client)
 		client.Listen()
 	}
@@ -78,14 +78,9 @@ func (srv *wsServer) Listen() {
 			srv.clients[c.id] = c
 			log.Printf("Added client %d\n", c.id)
 			log.Printf("%d clients connected\n", len(srv.clients))
-			srv.sendPastMessages(c)
 		case c := <-srv.delChan:
 			delete(srv.clients, c.id)
 			log.Printf("Deleted client %d\n", c.id)
-		case msg := <-srv.sendAllChan:
-			log.Println("Send all:", msg)
-			srv.messages = append(srv.messages, msg)
-			srv.sendAll(msg)
 		case err := <-srv.errChan:
 			log.Println("Error: ", err.Error())
 		case <-srv.doneChan:
@@ -101,26 +96,10 @@ func (srv *wsServer) Del(c *wsClient) {
 	srv.delChan <- c
 }
 
-func (srv *wsServer) SendAll(msg *wsMessage) {
-	srv.sendAllChan <- msg
-}
-
 func (srv *wsServer) Done() {
 	srv.doneChan <- true
 }
 
 func (srv *wsServer) Err(err error) {
 	srv.errChan <- err
-}
-
-func (srv *wsServer) sendPastMessages(c *wsClient) {
-	for _, msg := range srv.messages {
-		c.Write(msg)
-	}
-}
-
-func (srv *wsServer) sendAll(msg *wsMessage) {
-	for _, c := range srv.clients {
-		c.Write(msg)
-	}
 }

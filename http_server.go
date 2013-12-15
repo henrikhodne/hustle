@@ -65,7 +65,7 @@ func (srv *httpServer) setupMiddleware() {
 }
 
 func (srv *httpServer) setupRoutes() {
-	srv.m.Get(`/test`, srv.getTestPage)
+	srv.m.Get(`/disco`, srv.getDiscoPage)
 	srv.m.Get(`/pusher/info`, srv.getPusherInfo)
 	srv.m.Post(`/pusher/**`, srv.createUnknownThing)
 
@@ -76,9 +76,9 @@ func (srv *httpServer) setupRoutes() {
 	srv.m.Get(`/apps/:app_id/channels/:channel_name/users`, srv.getAppChannelUsers)
 }
 
-func (srv *httpServer) getTestPage(r render.Render, resp http.ResponseWriter) {
+func (srv *httpServer) getDiscoPage(r render.Render, resp http.ResponseWriter) {
 	resp.Header().Set("Access-Control-Allow-Origin", "*")
-	r.HTML(200, "test", srv.cfg)
+	r.HTML(200, "disco", srv.cfg)
 }
 
 func (srv *httpServer) getPusherInfo(r render.Render, resp http.ResponseWriter) {

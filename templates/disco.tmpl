@@ -1,0 +1,49 @@
+<h1>hustle disco</h1>
+<script src="pusher.min.js"></script>
+<script>
+(function() {
+  var pusher = new Pusher('hustle-disco', {
+    wsHost: '{{ .WSPubHost }}',
+    wsPort: '{{ .WSPubPort }}',
+    // wssPort: '???',
+    httpHost: '{{ .HTTPPubHost }}',
+    httpPort: '{{ .HTTPPubPort }}',
+    // httpsPort: '???',
+    httpPath: '/pusher',
+    statsHost: '{{ .StatsPubAddr }}',
+    authEndpoint: '/pusher/auth',
+    authTransport: 'ajax'
+  }),
+    targetEvent = 'client-disco-fun',
+    channel;
+
+  Pusher.log = function (data) {
+    console.log('\t\t', data);
+  };
+
+  pusher.bind('pusher:error', function (data) {
+    alert(data.message);
+  });
+
+  channel = pusher.subscribe('DISCO');
+  channel.bind(targetEvent, function(data) {
+    console.log('received data for %s: %o', targetEvent, data);
+    document.body.setAttribute(
+      'style', 'background-color: #' + data.color + ';'
+    )
+  });
+
+  setInterval(function() {
+    var color = (
+      Math.random() * 16777216
+    ).toString(16).replace('.', '').substring(0, 3);
+
+    try {
+      channel.trigger(targetEvent, { color: color });
+    } catch(e) {
+      console.log('channel trigger error: %o', e);
+    }
+  }, 300);
+})();
+
+</script>

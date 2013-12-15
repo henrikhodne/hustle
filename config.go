@@ -2,6 +2,8 @@ package hustle
 
 import (
 	"strings"
+
+	"github.com/kelseyhightower/envconfig"
 )
 
 // Config is the bag of poo that everyone knows about.  Wheeeee!
@@ -15,6 +17,11 @@ type Config struct {
 	// WSSAddr   string
 	StatsAddr    string
 	StatsPubAddr string
+}
+
+// ProcessConfig wraps envconfig.Process, dangit.
+func ProcessConfig(config *Config) error {
+	return envconfig.Process("hustle", config)
 }
 
 // HTTPHost returns only the host from HTTPAddr

@@ -7,7 +7,6 @@ import (
 	"os"
 
 	"github.com/joshk/hustle"
-	"github.com/kelseyhightower/envconfig"
 )
 
 var (
@@ -48,7 +47,7 @@ func init() {
 }
 
 func main() {
-	err := envconfig.Process("hustle", config)
+	err := hustle.ProcessConfig(config)
 	if err != nil {
 		log.Fatal(err.Error())
 	}

@@ -39,7 +39,7 @@ clean:
 	fi
 
 save:
-	$(GODEP) save -copy=false
+	$(GODEP) save -copy=false $(HUSTLE_PACKAGE)
 
 fmtpolice:
 	set -e; for f in $(shell git ls-files '*.go'); do gofmt $$f | diff -u $$f - ; done

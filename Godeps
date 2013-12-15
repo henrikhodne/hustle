@@ -1,6 +1,9 @@
 {
 	"ImportPath": "github.com/joshk/hustle",
 	"GoVersion": "go1.2",
+	"Packages": [
+		"github.com/joshk/hustle"
+	],
 	"Deps": [
 		{
 			"ImportPath": "code.google.com/p/go.net/websocket",
@@ -29,6 +32,10 @@
 		{
 			"ImportPath": "github.com/garyburd/redigo/redis",
 			"Rev": "933e59f1797af379095160ca63961442442e8807"
+		},
+		{
+			"ImportPath": "github.com/kelseyhightower/envconfig",
+			"Rev": "6ca61633287c0238628ee9dd44d14445ee4be426"
 		}
 	]
 }

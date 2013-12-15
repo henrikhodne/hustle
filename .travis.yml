@@ -5,7 +5,7 @@ go:
 - tip
 env:
   global:
-  - PATH=${GOPATH%%:*}/bin:$PATH
+  - PATH=$HOME/gopath/bin:$PATH
   - GO='godep go'
 before_install: go get -x github.com/kr/godep
 install: make build

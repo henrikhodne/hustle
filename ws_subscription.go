@@ -36,7 +36,7 @@ func newWsSubscription(ws *websocket.Conn, h *hub, msg *wsMessage) *wsSubscripti
 }
 
 func (wsSub *wsSubscription) Subscribe() string {
-	err := wsSub.sendPayload(wsSub.msg.Data.Channel,
+	err := wsSub.sendPayload(wsSub.msg.Channel,
 		"pusher_internal:subscription_succeeded", nil)
 	if err != nil {
 		log.Printf("error subscribing: %v\n", err)
@@ -49,7 +49,7 @@ func (wsSub *wsSubscription) Subscribe() string {
 }
 
 func (wsSub *wsSubscription) subscribeForever() {
-	subChan, subQuitChan := wsSub.h.Subscribe(wsSub.msg.Data.Channel, wsSub.socketID)
+	subChan, subQuitChan := wsSub.h.Subscribe(wsSub.msg.Channel, wsSub.socketID)
 	if subChan == nil {
 		return
 	}

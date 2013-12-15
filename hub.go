@@ -10,19 +10,27 @@ import (
 
 type hub struct {
 	addr     string
-	redis    redis.Conn
+	pubRedis redis.Conn
+	subRedis redis.Conn
 	subs     map[string]chan bool
 	subsLock *sync.Mutex
 }
 
 func newHub(addr string) (*hub, error) {
-	conn, err := redis.Dial("tcp", addr)
+	pubConn, err := redis.Dial("tcp", addr)
 	if err != nil {
 		return nil, err
 	}
+
+	subConn, err := redis.Dial("tcp", addr)
+	if err != nil {
+		return nil, err
+	}
+
 	return &hub{
 		addr:     addr,
-		redis:    conn,
+		pubRedis: pubConn,
+		subRedis: subConn,
 		subs:     make(map[string]chan bool),
 		subsLock: &sync.Mutex{},
 	}, nil
@@ -35,7 +43,7 @@ func (h *hub) PublishEvent(ep *eventPayload) (interface{}, error) {
 		return nil, err
 	}
 
-	return h.redis.Do("PUBLISH", ep.Channel, payloadBytes)
+	return h.pubRedis.Do("PUBLISH", ep.Channel, payloadBytes)
 }
 
 func (h *hub) Subscribe(channelID, subscriptionID string) (chan redis.Message, chan bool) {
@@ -53,7 +61,7 @@ func (h *hub) Subscribe(channelID, subscriptionID string) (chan redis.Message, c
 	subChan := make(chan redis.Message)
 
 	go func() {
-		psc := &redis.PubSubConn{h.redis}
+		psc := &redis.PubSubConn{h.subRedis}
 		psc.Subscribe(channelID)
 
 		for {

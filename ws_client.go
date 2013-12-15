@@ -102,7 +102,7 @@ func (c *wsClient) pusherPing(msg *wsMessage) {
 func (c *wsClient) pusherPong(msg *wsMessage) {}
 
 func (c *wsClient) pusherSubscribe(msg *wsMessage) {
-	channelID := msg.Data.Channel
+	channelID := msg.Channel
 	if _, ok := c.subs[channelID]; ok {
 		c.sendError(-1,
 			fmt.Sprintf("Existing subscription to channel %s", channelID))
@@ -120,7 +120,7 @@ func (c *wsClient) pusherUnsubscribe(msg *wsMessage) {
 		ok     bool
 	)
 
-	channelID := msg.Data.Channel
+	channelID := msg.Channel
 	if subsID, ok = c.subs[channelID]; ok {
 		delete(c.subs, channelID)
 	}
@@ -142,10 +142,14 @@ func (c *wsClient) sendPayload(channel, event string, payload interface{}) {
 
 func (c *wsClient) publishClientEvent(msg *wsMessage) {
 	log.Printf("publishing client event %#v\n", msg)
-	c.h.PublishEvent(&eventPayload{
+	response, err := c.h.PublishEvent(&eventPayload{
 		Event:    msg.Event,
-		Channel:  msg.Data.Channel,
+		Channel:  msg.Channel,
 		SocketID: msg.SocketID,
-		Data:     msg.Data.ChannelData,
+		Data:     msg.Data,
 	})
+	if err != nil {
+		c.srv.Err(err)
+	}
+	log.Printf("publish response: %#v\n", response)
 }

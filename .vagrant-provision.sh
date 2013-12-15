@@ -42,10 +42,12 @@ if ! which shoreman ; then
 fi
 
 service nginx stop
-
 ln -svf /vagrant/.vagrant-skel/nginx.conf /etc/nginx/nginx.conf
 rm -vf /etc/nginx/sites-enabled/hustle
-
 service nginx start
+
+stop redis-server || true
+cp -v  /vagrant/.vagrant-skel/etc-init-redis-server.conf /etc/init/redis-server.conf
+start redis-server
 
 su - vagrant -c /vagrant/.vagrant-provision-as-vagrant.sh

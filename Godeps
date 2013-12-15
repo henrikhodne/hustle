@@ -3,6 +3,11 @@
 	"GoVersion": "go1.2",
 	"Deps": [
 		{
+			"ImportPath": "code.google.com/p/go.net/websocket",
+			"Comment": "null-99",
+			"Rev": "65926d3a7d01d26b31f8e70a799044bcecb48775"
+		},
+		{
 			"ImportPath": "github.com/codegangsta/inject",
 			"Rev": "07b1cf5ecdb5134a1f79a0efd22900feb306fc31"
 		},
@@ -12,9 +17,18 @@
 			"Rev": "6f2168ebc296c3a7698a5929378a9d68b04b7a12"
 		},
 		{
+			"ImportPath": "github.com/codegangsta/martini-contrib/binding",
+			"Comment": "v0.1-33-g9e2ccb8",
+			"Rev": "9e2ccb8ed9db1d45b22e3f552f69253b51b1e869"
+		},
+		{
 			"ImportPath": "github.com/codegangsta/martini-contrib/render",
 			"Comment": "v0.1-33-g9e2ccb8",
 			"Rev": "9e2ccb8ed9db1d45b22e3f552f69253b51b1e869"
+		},
+		{
+			"ImportPath": "github.com/garyburd/redigo/redis",
+			"Rev": "933e59f1797af379095160ca63961442442e8807"
 		}
 	]
 }

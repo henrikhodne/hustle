@@ -46,7 +46,17 @@ func (h *hub) PublishEvent(ep *eventPayload) (interface{}, error) {
 	return h.pubRedis.Do("PUBLISH", ep.Channel, payloadBytes)
 }
 
-func (h *hub) Subscribe(channelID, subscriptionID string) (chan redis.Message, chan bool) {
+func (h *hub) Subscribe(channelID, subscriptionID string) (chan *wsMessage, chan bool) {
+	if channelID == "" {
+		log.Println("channel id not present")
+		return nil, nil
+	}
+
+	if subscriptionID == "" {
+		log.Println("subscription id not present")
+		return nil, nil
+	}
+
 	h.subsLock.Lock()
 	defer h.subsLock.Unlock()
 
@@ -57,24 +67,35 @@ func (h *hub) Subscribe(channelID, subscriptionID string) (chan redis.Message, c
 
 	subQuitChan := make(chan bool)
 	h.subs[subscriptionID] = subQuitChan
+	log.Printf("subscription %s added\n", subscriptionID)
 
-	subChan := make(chan redis.Message)
+	subChan := make(chan *wsMessage)
 
 	go func() {
 		psc := &redis.PubSubConn{h.subRedis}
 		psc.Subscribe(channelID)
 
-		for {
-			select {
-			case <-subQuitChan:
-				return
-			}
+		log.Printf("subscription %s waiting for messages on channel %s",
+			subscriptionID, channelID)
 
+		for {
 			switch v := psc.Receive().(type) {
 			case redis.Message:
-				subChan <- v
+				log.Printf("subscription %s received redis message on channel %s\n",
+					subscriptionID, channelID)
+				msg := newWsMessage()
+				err := json.Unmarshal(v.Data, msg)
+				if err != nil {
+					log.Printf("error unmarshaling message: %v\n", err)
+				} else {
+					log.Printf("subscription %s sending message to subChan: %#v\n", subscriptionID, msg)
+					subChan <- msg
+				}
 			case error:
 				log.Printf("subscription %s error on channel %s\n",
+					subscriptionID, channelID, v)
+			default:
+				log.Printf("subscription %s received unknown on channel %s: %#v\n",
 					subscriptionID, channelID, v)
 			}
 		}

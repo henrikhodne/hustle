@@ -1,75 +1,53 @@
 package hustle
 
 import (
-	"fmt"
 	"log"
-
-	"code.google.com/p/go.net/websocket"
 )
 
 type wsSubscription struct {
-	ws    *websocket.Conn
-	h     *hub
-	msg   *wsMessage
-	qChan chan bool
-
+	h        *hub
+	msg      *wsMessage
 	socketID string
+	qChan    chan bool
 }
 
-func newWsSubscription(ws *websocket.Conn, h *hub, msg *wsMessage) *wsSubscription {
-	if ws == nil {
-		log.Panic("ws cannot be nil")
-	}
-
+func newWsSubscription(socketID string, h *hub, msg *wsMessage) *wsSubscription {
 	if h == nil {
 		log.Panic("hub cannot be nil")
 	}
 
-	return &wsSubscription{
-		ws:  ws,
-		h:   h,
-		msg: msg,
+	if msg == nil {
+		log.Panic("msg cannot be nil")
+	}
 
-		qChan:    make(chan bool),
-		socketID: fmt.Sprintf("%s", ws.RemoteAddr().String()),
+	return &wsSubscription{
+		h:        h,
+		msg:      msg,
+		socketID: socketID,
+
+		qChan: make(chan bool),
 	}
 }
 
-func (wsSub *wsSubscription) Subscribe() string {
-	err := wsSub.sendPayload(wsSub.msg.Channel,
-		"pusher_internal:subscription_succeeded", nil)
-	if err != nil {
-		log.Printf("error subscribing: %v\n", err)
-		return wsSub.socketID
-	}
-
-	go wsSub.subscribeForever()
+func (wsSub *wsSubscription) Subscribe(outMsgChan chan *wsMessage) string {
+	go wsSub.subscribeForever(outMsgChan)
 
 	return wsSub.socketID
 }
 
-func (wsSub *wsSubscription) subscribeForever() {
-	subChan, subQuitChan := wsSub.h.Subscribe(wsSub.msg.Channel, wsSub.socketID)
+func (wsSub *wsSubscription) subscribeForever(outMsgChan chan *wsMessage) {
+	subChan, _ := wsSub.h.Subscribe(wsSub.msg.Channel, wsSub.socketID)
 	if subChan == nil {
+		log.Println("cannot use a nil subscription channel")
 		return
 	}
 
 	for {
 		select {
-		case <-wsSub.qChan:
-			subQuitChan <- true
-			return
-		case m := <-subChan:
-			wsSub.sendPayload(m.Channel, "no_idea_what_this_should_be", m.Data)
+		case msg := <-subChan:
+			log.Printf("subscription %s delegating message to outMsgChan\n", wsSub.socketID)
+			outMsgChan <- msg
+			log.Printf("subscription %s successfully delegated %#v\n", wsSub.socketID, msg)
 		}
 	}
-}
-
-func (wsSub *wsSubscription) sendPayload(channelID, eventName string, payload interface{}) error {
-	return websocket.JSON.Send(wsSub.ws, &eventPayload{
-		Event:    eventName,
-		Channel:  channelID,
-		Data:     payload,
-		SocketID: wsSub.socketID,
-	})
 }

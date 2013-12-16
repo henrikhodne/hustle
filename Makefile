@@ -7,6 +7,8 @@ REPO_VERSION := $(shell git describe --always --dirty --tags)
 REV_VAR := $(HUSTLE_PACKAGE).RevisionString
 REPO_REV := $(shell git rev-parse --sq HEAD)
 
+GO ?= go
+GODEP ?= godep
 GO_TAG_ARGS ?= -tags full
 TAGS_VAR := $(HUSTLE_PACKAGE).BuildTags
 GOBUILD_LDFLAGS := -ldflags "-X $(VERSION_VAR) $(REPO_VERSION) -X $(REV_VAR) $(REPO_REV) -X $(TAGS_VAR) '$(GO_TAG_ARGS)' "
@@ -15,26 +17,29 @@ HUSTLE_HTTPADDR ?= :8661
 HUSTLE_WSADDR ?= :8663
 HUSTLE_STATSADDR ?= :8665
 
-all: clean test
+all: clean test save
 
 test: build fmtpolice
-	go test -race $(GOBUILD_LDFLAGS) $(GO_TAG_ARGS) -x -v $(TARGETS)
+	$(GO) test -race $(GOBUILD_LDFLAGS) $(GO_TAG_ARGS) -x -v $(TARGETS)
 
 build: deps
-	go install $(GOBUILD_LDFLAGS) $(GO_TAG_ARGS) -x $(TARGETS)
+	$(GO) install $(GOBUILD_LDFLAGS) $(GO_TAG_ARGS) -x $(TARGETS)
 
 deps: public/pusher.js public/pusher.min.js
 	if [ ! -e $${GOPATH%%:*}/src/$(HUSTLE_PACKAGE) ] ; then \
 		mkdir -p $${GOPATH%%:*}/src/github.com/joshk ; \
 		ln -sv $(PWD) $${GOPATH%%:*}/src/$(HUSTLE_PACKAGE) ; \
 	fi
-	go get $(GOBUILD_LDFLAGS) $(GO_TAG_ARGS) -x $(TARGETS)
+	$(GODEP) restore
 
 clean:
-	go clean -x $(TARGETS) || true
+	$(GO) clean -x $(TARGETS) || true
 	if [ -d $${GOPATH%%:*}/pkg ] ; then \
 		find $${GOPATH%%:*}/pkg -name '*hustle*' -exec rm -v {} \; ; \
 	fi
+
+save:
+	$(GODEP) save -copy=false $(HUSTLE_PACKAGE)
 
 fmtpolice:
 	set -e; for f in $(shell git ls-files '*.go'); do gofmt $$f | diff -u $$f - ; done

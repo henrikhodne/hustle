@@ -1,8 +1,12 @@
 ---
 language: go
 go:
-- 1.1
 - 1.2
 - tip
+env:
+  global:
+  - PATH=$HOME/gopath/bin:$PATH
+  - GO='godep go'
+before_install: go get -x github.com/kr/godep
 install: make build
 script: make test

@@ -9,17 +9,18 @@ import (
 )
 
 // StatsServerMain is the whole shebang for the stats, mannn
-func StatsServerMain(addr string) {
+func StatsServerMain(cfg *Config) {
 	m := martini.Classic()
 	m.Use(render.Renderer())
 	m.Use(martini.Logger())
+	m.Use(CORSAllowAny())
 
 	m.Get(`/timeline/:id`, handleStatsJSONP)
 
-	log.Printf("hustle-server Stats HTTP listening at %s\n", addr)
-	log.Fatal(http.ListenAndServe(addr, m))
+	log.Printf("hustle-server Stats HTTP listening at %s\n", cfg.StatsAddr)
+	log.Fatal(http.ListenAndServe(cfg.StatsAddr, m))
 }
 
-func handleStatsJSONP() string {
-	return ""
+func handleStatsJSONP(r render.Render) {
+	r.JSON(200, map[string]string{})
 }

@@ -36,11 +36,6 @@ if ! redis-server -v ; then
   cp -v src/redis-cli /usr/local/bin/
 fi
 
-if ! which shoreman ; then
-  curl -s -L -o /usr/local/bin/shoreman https://raw.github.com/hecticjeff/shoreman/master/shoreman.sh
-  chmod +x /usr/local/bin/shoreman
-fi
-
 service nginx stop
 ln -svf /vagrant/.vagrant-skel/nginx.conf /etc/nginx/nginx.conf
 rm -vf /etc/nginx/sites-enabled/hustle

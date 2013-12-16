@@ -1,5 +1,8 @@
 HUSTLE_PACKAGE := github.com/joshk/hustle
-TARGETS := $(HUSTLE_PACKAGE) $(HUSTLE_PACKAGE)/hustle-server
+TARGETS := \
+  $(HUSTLE_PACKAGE) \
+  $(HUSTLE_PACKAGE)/hustle-server \
+  $(HUSTLE_PACKAGE)/hustle-black-box-test
 
 VERSION_VAR := $(HUSTLE_PACKAGE).VersionString
 REPO_VERSION := $(shell git describe --always --dirty --tags)
@@ -20,6 +23,7 @@ HUSTLE_STATSADDR ?= :8665
 all: clean test save
 
 test: build fmtpolice
+	$(GO) test -i $(GOBUILD_LDFLAGS) $(GO_TAG_ARGS) -x -v $(TARGETS)
 	$(GO) test -race $(GOBUILD_LDFLAGS) $(GO_TAG_ARGS) -x -v $(TARGETS)
 
 build: deps
@@ -39,7 +43,7 @@ clean:
 	fi
 
 save:
-	$(GODEP) save -copy=false $(HUSTLE_PACKAGE)
+	$(GODEP) save -copy=false $(HUSTLE_PACKAGE) $(HUSTLE_PACKAGE)/hustle-black-box-test
 
 fmtpolice:
 	set -e; for f in $(shell git ls-files '*.go'); do gofmt $$f | diff -u $$f - ; done

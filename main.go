@@ -4,13 +4,16 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net/url"
 	"os"
 
 	hustleServer "github.com/joshk/hustle/server"
 )
 
 var (
-	config = &hustleServer.Config{
+	envPort      = os.Getenv("PORT")
+	envRedisAddr = os.Getenv("REDISTOGO_URL")
+	config       = &hustleServer.Config{
 		HTTPAddr:    ":8661",
 		HTTPPubAddr: "localhost:8661",
 		// HTTPSAddr: ":8662",
@@ -29,6 +32,14 @@ var (
 )
 
 func init() {
+	if len(envPort) > 0 {
+		config.HTTPAddr = ":" + envPort
+	}
+
+	if hubAddr, ok := getRedisURL(envRedisAddr); ok {
+		config.HubAddr = hubAddr
+	}
+
 	flag.StringVar(&config.HTTPAddr, "http-addr", config.HTTPAddr,
 		"HTTP Server address")
 	flag.StringVar(&config.HTTPPubAddr, "http-public-addr", config.HTTPAddr,
@@ -44,6 +55,28 @@ func init() {
 	flag.StringVar(&config.StatsPubAddr, "stats-public-addr",
 		config.StatsPubAddr,
 		"Stats Public Server address (reachable from distant lands)")
+}
+
+func getRedisURL(addr string) (string, bool) {
+	parsed, err := url.Parse(addr)
+	if err != nil {
+		log.Println("Failed to parse REDISTOGO_URL:", err)
+		return "", false
+	}
+
+	if parsed.User == nil {
+		return parsed.Host, true
+	}
+
+	if passwd, ok := parsed.User.Password(); ok {
+		return fmt.Sprintf("%s:%s@%s",
+			parsed.User.Username(),
+			passwd,
+			parsed.Host,
+		), true
+	}
+
+	return "", false
 }
 
 func main() {

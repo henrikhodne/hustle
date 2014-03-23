@@ -26,7 +26,8 @@ test: build fmtpolice
 	$(GO) test -race $(GOBUILD_LDFLAGS) $(GO_TAG_ARGS) -x -v $(TARGETS)
 
 build: deps
-	$(GO) install $(GOBUILD_LDFLAGS) $(GO_TAG_ARGS) -x $(TARGETS)
+	$(GO) install $(GOBUILD_LDFLAGS) $(GO_TAG_ARGS) -x $(HUSTLE_PACKAGE)/server
+	$(GO) build -x -o $${GOPATH%%:*}/bin/hustle-server .
 
 deps: public/pusher.js public/pusher.min.js
 	if [ ! -e $${GOPATH%%:*}/src/$(HUSTLE_PACKAGE) ] ; then \

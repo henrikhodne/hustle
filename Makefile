@@ -1,8 +1,7 @@
 HUSTLE_PACKAGE := github.com/joshk/hustle
 TARGETS := \
   $(HUSTLE_PACKAGE) \
-  $(HUSTLE_PACKAGE)/hustle-server \
-  $(HUSTLE_PACKAGE)/hustle-black-box-test
+  $(HUSTLE_PACKAGE)/server
 
 VERSION_VAR := $(HUSTLE_PACKAGE).VersionString
 REPO_VERSION := $(shell git describe --always --dirty --tags)
@@ -39,17 +38,17 @@ deps: public/pusher.js public/pusher.min.js
 clean:
 	$(GO) clean -x $(TARGETS) || true
 	if [ -d $${GOPATH%%:*}/pkg ] ; then \
-		find $${GOPATH%%:*}/pkg -name '*hustle*' -exec rm -v {} \; ; \
+		find $${GOPATH%%:*}/pkg -name '*hustle*' -exec rm -rvf {} \; || true; \
 	fi
 
 save:
-	$(GODEP) save -copy=false $(HUSTLE_PACKAGE) $(HUSTLE_PACKAGE)/hustle-black-box-test
+	$(GODEP) save -copy=false $(HUSTLE_PACKAGE)/server
 
 fmtpolice:
 	set -e; for f in $(shell git ls-files '*.go'); do gofmt $$f | diff -u $$f - ; done
 
 serve:
-	exec $${GOPATH%%:*}/bin/hustle-server \
+	exec $${GOPATH%%:*}/bin/hustle \
 	  -http-addr=$(HUSTLE_HTTPADDR) \
 	  -ws-addr=$(HUSTLE_WSADDR) \
 	  -stats-addr=$(HUSTLE_STATSADDR)

@@ -6,11 +6,11 @@ import (
 	"log"
 	"os"
 
-	"github.com/joshk/hustle"
+	hustleServer "github.com/joshk/hustle/server"
 )
 
 var (
-	config = &hustle.Config{
+	config = &hustleServer.Config{
 		HTTPAddr:    ":8661",
 		HTTPPubAddr: "localhost:8661",
 		// HTTPSAddr: ":8662",
@@ -47,7 +47,7 @@ func init() {
 }
 
 func main() {
-	err := hustle.ProcessConfig(config)
+	err := hustleServer.ProcessConfig(config)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -55,17 +55,17 @@ func main() {
 	flag.Parse()
 
 	if *versionFlag {
-		fmt.Println(hustle.VersionString)
+		fmt.Println(hustleServer.VersionString)
 		os.Exit(0)
 	}
 
 	if *revisionFlag {
-		fmt.Println(hustle.RevisionString)
+		fmt.Println(hustleServer.RevisionString)
 		os.Exit(0)
 	}
 
 	if *versionPlusFlag {
-		fmt.Println(hustle.VersionPlusJSON)
+		fmt.Println(hustleServer.VersionPlusJSON)
 		os.Exit(0)
 	}
 
@@ -78,9 +78,9 @@ func main() {
 		}
 	}()
 
-	go hustle.HTTPServerMain(config)
-	go hustle.WSServerMain(config)
-	go hustle.StatsServerMain(config)
+	go hustleServer.HTTPServerMain(config)
+	go hustleServer.WSServerMain(config)
+	go hustleServer.StatsServerMain(config)
 
 	<-quit
 }

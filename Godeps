@@ -1,9 +1,8 @@
 {
-	"ImportPath": "github.com/joshk/hustle",
+	"ImportPath": "_/Users/d.buch/workspace/hustle",
 	"GoVersion": "go1.2",
 	"Packages": [
-		"github.com/joshk/hustle",
-		"github.com/joshk/hustle/hustle-black-box-test"
+		"github.com/joshk/hustle/server"
 	],
 	"Deps": [
 		{
@@ -35,46 +34,8 @@
 			"Rev": "933e59f1797af379095160ca63961442442e8807"
 		},
 		{
-			"ImportPath": "github.com/jacobsa/oglematchers",
-			"Rev": "00a5a2616650f55dd84f982eeb13153c5e1cffad"
-		},
-		{
 			"ImportPath": "github.com/kelseyhightower/envconfig",
 			"Rev": "6ca61633287c0238628ee9dd44d14445ee4be426"
-		},
-		{
-			"ImportPath": "github.com/smartystreets/goconvey/assertions",
-			"Comment": "1.4.0-113-g2d8a79a",
-			"Rev": "2d8a79ad17a56808b402fc8234be14b58b3d333a"
-		},
-		{
-			"ImportPath": "github.com/smartystreets/goconvey/convey",
-			"Comment": "1.4.0-113-g2d8a79a",
-			"Rev": "2d8a79ad17a56808b402fc8234be14b58b3d333a"
-		},
-		{
-			"ImportPath": "github.com/smartystreets/goconvey/execution",
-			"Comment": "1.4.0-113-g2d8a79a",
-			"Rev": "2d8a79ad17a56808b402fc8234be14b58b3d333a"
-		},
-		{
-			"ImportPath": "github.com/smartystreets/goconvey/gotest",
-			"Comment": "1.4.0-113-g2d8a79a",
-			"Rev": "2d8a79ad17a56808b402fc8234be14b58b3d333a"
-		},
-		{
-			"ImportPath": "github.com/smartystreets/goconvey/printing",
-			"Comment": "1.4.0-113-g2d8a79a",
-			"Rev": "2d8a79ad17a56808b402fc8234be14b58b3d333a"
-		},
-		{
-			"ImportPath": "github.com/smartystreets/goconvey/reporting",
-			"Comment": "1.4.0-113-g2d8a79a",
-			"Rev": "2d8a79ad17a56808b402fc8234be14b58b3d333a"
-		},
-		{
-			"ImportPath": "github.com/timonv/pusher",
-			"Rev": "011114c803b3adb8dab3c66f3d4648e8b9513bd9"
 		}
 	]
 }

@@ -37,6 +37,10 @@ func newHub(addr string) (*hub, error) {
 	}
 
 	if auth != "" {
+		if authParts := strings.Split(auth, ":"); len(authParts) > 1 {
+			auth = strings.Split(auth, ":")[1]
+		}
+
 		if _, err := pubConn.Do("AUTH", auth); err != nil {
 			pubConn.Close()
 			return nil, err

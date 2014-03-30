@@ -1,7 +1,8 @@
 {
-	"ImportPath": "_/Users/d.buch/workspace/hustle",
+	"ImportPath": "_/home/me/repos/hustle",
 	"GoVersion": "go1.2",
 	"Packages": [
+		"github.com/joshk/hustle",
 		"github.com/joshk/hustle/server"
 	],
 	"Deps": [

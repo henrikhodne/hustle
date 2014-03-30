@@ -43,7 +43,7 @@ clean:
 	fi
 
 save:
-	$(GODEP) save -copy=false $(HUSTLE_PACKAGE)/server
+	$(GODEP) save -copy=false $(HUSTLE_PACKAGE) $(HUSTLE_PACKAGE)/server
 
 fmtpolice:
 	set -e; for f in $(shell git ls-files '*.go'); do gofmt $$f | diff -u $$f - ; done

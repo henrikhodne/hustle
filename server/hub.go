@@ -3,6 +3,7 @@ package hustle
 import (
 	"encoding/json"
 	"log"
+	"strings"
 	"sync"
 
 	"github.com/garyburd/redigo/redis"
@@ -17,6 +18,14 @@ type hub struct {
 }
 
 func newHub(addr string) (*hub, error) {
+	auth := ""
+
+	addrParts := strings.Split(addr, "@")
+	if len(addrParts) > 1 {
+		auth = addrParts[0]
+		addr = addrParts[1]
+	}
+
 	pubConn, err := redis.Dial("tcp", addr)
 	if err != nil {
 		return nil, err
@@ -25,6 +34,18 @@ func newHub(addr string) (*hub, error) {
 	subConn, err := redis.Dial("tcp", addr)
 	if err != nil {
 		return nil, err
+	}
+
+	if auth != "" {
+		if _, err := pubConn.Do("AUTH", auth); err != nil {
+			pubConn.Close()
+			return nil, err
+		}
+
+		if _, err := subConn.Do("AUTH", auth); err != nil {
+			subConn.Close()
+			return nil, err
+		}
 	}
 
 	return &hub{

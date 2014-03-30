@@ -6,14 +6,16 @@ import (
 	"log"
 	"net/url"
 	"os"
+	"strings"
 
 	hustleServer "github.com/joshk/hustle/server"
 )
 
 var (
-	envPort      = os.Getenv("PORT")
-	envRedisAddr = os.Getenv("REDISTOGO_URL")
-	config       = &hustleServer.Config{
+	envPort          = os.Getenv("PORT")
+	envRedisAddr     = os.Getenv("REDIS_URL")
+	envRedisToGoAddr = os.Getenv("REDISTOGO_URL")
+	config           = &hustleServer.Config{
 		HTTPAddr:    ":8661",
 		HTTPPubAddr: "localhost:8661",
 		// HTTPSAddr: ":8662",
@@ -40,6 +42,10 @@ func init() {
 		config.HubAddr = hubAddr
 	}
 
+	if hubAddr, ok := getRedisToGoURL(envRedisToGoAddr); ok {
+		config.HubAddr = hubAddr
+	}
+
 	flag.StringVar(&config.HTTPAddr, "http-addr", config.HTTPAddr,
 		"HTTP Server address")
 	flag.StringVar(&config.HTTPPubAddr, "http-public-addr", config.HTTPAddr,
@@ -60,7 +66,7 @@ func init() {
 func getRedisURL(addr string) (string, bool) {
 	parsed, err := url.Parse(addr)
 	if err != nil {
-		log.Println("Failed to parse REDISTOGO_URL:", err)
+		log.Println("Failed to parse REDIS_URL:", err)
 		return "", false
 	}
 
@@ -77,6 +83,18 @@ func getRedisURL(addr string) (string, bool) {
 	}
 
 	return "", false
+}
+
+func getRedisToGoURL(addr string) (string, bool) {
+	// "redistogo:fooauth@grideye.redistogo.com:10328"
+	parts := strings.Split(addr, ":")
+	if len(parts) != 3 {
+		log.Printf("REDISTOGO_URL is of unknown format "+
+			"(has %d \":\"-delimited parts)\n", len(parts))
+		return "", false
+	}
+
+	return fmt.Sprintf("%s:%s", parts[1], parts[2]), true
 }
 
 func main() {

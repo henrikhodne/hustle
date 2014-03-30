@@ -30,6 +30,10 @@ var (
 	revisionFlag    = flag.Bool("revision", false, "Print revision and exit")
 	versionPlusFlag = flag.Bool("version+", false,
 		"Print version and revision and exit")
+	runAllFlag   = flag.Bool("all", true, "Run all server types (overrides 'http', 'ws', and 'stats' flags)")
+	runHTTPFlag  = flag.Bool("http", false, "Run the HTTP server (overridden by 'all' flag)")
+	runWSFlag    = flag.Bool("ws", false, "Run the WS server (overridden by 'all' flag)")
+	runStatsFlag = flag.Bool("stats", false, "Run the Stats server (overridden by 'all' flag)")
 )
 
 func init() {
@@ -117,9 +121,17 @@ func main() {
 		}
 	}()
 
-	go hustleServer.HTTPServerMain(config)
-	go hustleServer.WSServerMain(config)
-	go hustleServer.StatsServerMain(config)
+	if *runAllFlag || *runHTTPFlag {
+		go hustleServer.HTTPServerMain(config)
+	}
+
+	if *runAllFlag || *runWSFlag {
+		go hustleServer.WSServerMain(config)
+	}
+
+	if *runAllFlag || *runStatsFlag {
+		go hustleServer.StatsServerMain(config)
+	}
 
 	<-quit
 }

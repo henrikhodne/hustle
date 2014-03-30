@@ -51,7 +51,7 @@ func newHTTPServer(cfg *Config) (*httpServer, error) {
 func (srv *httpServer) Listen() {
 	srv.setupMiddleware()
 	srv.setupRoutes()
-	log.Printf("hustle-server HTTP listening at %s\n", srv.cfg.HTTPAddr)
+	log.Printf("hustle HTTP listening at %s\n", srv.cfg.HTTPAddr)
 	log.Fatal(http.ListenAndServe(srv.cfg.HTTPAddr, srv.m))
 }
 

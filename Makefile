@@ -27,7 +27,7 @@ test: build fmtpolice
 
 build: deps
 	$(GO) install $(GOBUILD_LDFLAGS) $(GO_TAG_ARGS) -x $(HUSTLE_PACKAGE)/server
-	$(GO) build -x -o $${GOPATH%%:*}/bin/hustle-server .
+	$(GO) build -x -o $${GOPATH%%:*}/bin/hustle .
 
 deps: public/pusher.js public/pusher.min.js
 	if [ ! -e $${GOPATH%%:*}/src/$(HUSTLE_PACKAGE) ] ; then \
@@ -43,7 +43,7 @@ clean:
 	fi
 
 save:
-	$(GODEP) save $(HUSTLE_PACKAGE) $(HUSTLE_PACKAGE)/server
+	$(GODEP) save
 
 fmtpolice:
 	set -e; for f in $(shell git ls-files '*.go' | grep -v Godeps); do gofmt $$f | diff -u $$f - ; done

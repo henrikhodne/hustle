@@ -1,1 +1,1 @@
-web: hustle-server
+web: hustle

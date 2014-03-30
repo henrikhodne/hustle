@@ -17,7 +17,7 @@ func StatsServerMain(cfg *Config) {
 
 	m.Get(`/timeline/:id`, handleStatsJSONP)
 
-	log.Printf("hustle-server Stats HTTP listening at %s\n", cfg.StatsAddr)
+	log.Printf("hustle Stats HTTP listening at %s\n", cfg.StatsAddr)
 	log.Fatal(http.ListenAndServe(cfg.StatsAddr, m))
 }
 

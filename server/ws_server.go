@@ -65,7 +65,7 @@ func (srv *wsServer) Listen() {
 	http.Handle(`/`, websocket.Handler(onConnected))
 
 	go func() {
-		log.Printf("hustle-server WS listening at %s\n", srv.cfg.WSAddr)
+		log.Printf("hustle WS listening at %s\n", srv.cfg.WSAddr)
 		log.Fatal(http.ListenAndServe(srv.cfg.WSAddr, nil))
 	}()
 

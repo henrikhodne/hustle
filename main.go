@@ -124,6 +124,8 @@ func main() {
 		}
 	}()
 
+	log.Println("hustle starting up server(s)")
+
 	if *runAllFlag || *runHTTPFlag {
 		go hustleServer.HTTPServerMain(config)
 	}

@@ -37,6 +37,9 @@ var (
 )
 
 func init() {
+	// Send everything to stdout to play nicely with heroku
+	log.SetOutput(os.Stdout)
+
 	if len(envPort) > 0 {
 		config.HTTPAddr = ":" + envPort
 	}

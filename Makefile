@@ -1,8 +1,7 @@
 HUSTLE_PACKAGE := github.com/joshk/hustle
 TARGETS := \
   $(HUSTLE_PACKAGE) \
-  $(HUSTLE_PACKAGE)/hustle-server \
-  $(HUSTLE_PACKAGE)/hustle-black-box-test
+  $(HUSTLE_PACKAGE)/server
 
 VERSION_VAR := $(HUSTLE_PACKAGE).VersionString
 REPO_VERSION := $(shell git describe --always --dirty --tags)
@@ -27,7 +26,8 @@ test: build fmtpolice
 	$(GO) test -race $(GOBUILD_LDFLAGS) $(GO_TAG_ARGS) -x -v $(TARGETS)
 
 build: deps
-	$(GO) install $(GOBUILD_LDFLAGS) $(GO_TAG_ARGS) -x $(TARGETS)
+	$(GO) install $(GOBUILD_LDFLAGS) $(GO_TAG_ARGS) -x $(HUSTLE_PACKAGE)/server
+	$(GO) build -x -o $${GOPATH%%:*}/bin/hustle .
 
 deps: public/pusher.js public/pusher.min.js
 	if [ ! -e $${GOPATH%%:*}/src/$(HUSTLE_PACKAGE) ] ; then \
@@ -39,17 +39,17 @@ deps: public/pusher.js public/pusher.min.js
 clean:
 	$(GO) clean -x $(TARGETS) || true
 	if [ -d $${GOPATH%%:*}/pkg ] ; then \
-		find $${GOPATH%%:*}/pkg -name '*hustle*' -exec rm -v {} \; ; \
+		find $${GOPATH%%:*}/pkg -name '*hustle*' -exec rm -rvf {} \; || true; \
 	fi
 
 save:
-	$(GODEP) save -copy=false $(HUSTLE_PACKAGE) $(HUSTLE_PACKAGE)/hustle-black-box-test
+	$(GODEP) save
 
 fmtpolice:
-	set -e; for f in $(shell git ls-files '*.go'); do gofmt $$f | diff -u $$f - ; done
+	set -e; for f in $(shell git ls-files '*.go' | grep -v Godeps); do gofmt $$f | diff -u $$f - ; done
 
 serve:
-	exec $${GOPATH%%:*}/bin/hustle-server \
+	exec $${GOPATH%%:*}/bin/hustle \
 	  -http-addr=$(HUSTLE_HTTPADDR) \
 	  -ws-addr=$(HUSTLE_WSADDR) \
 	  -stats-addr=$(HUSTLE_STATSADDR)

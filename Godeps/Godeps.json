@@ -8,35 +8,33 @@
 	"Deps": [
 		{
 			"ImportPath": "code.google.com/p/go.net/websocket",
-			"Comment": "null-99",
-			"Rev": "65926d3a7d01d26b31f8e70a799044bcecb48775"
+			"Comment": "null-117",
+			"Rev": "c17ad62118ea511e1051721b429779fa40bddc74"
 		},
 		{
 			"ImportPath": "github.com/codegangsta/inject",
-			"Rev": "07b1cf5ecdb5134a1f79a0efd22900feb306fc31"
+			"Rev": "9aea7a2fa5b79ef7fc00f63a575e72df33b4e886"
 		},
 		{
 			"ImportPath": "github.com/codegangsta/martini",
-			"Comment": "v0.1-13-g6f2168e",
-			"Rev": "6f2168ebc296c3a7698a5929378a9d68b04b7a12"
-		},
-		{
-			"ImportPath": "github.com/codegangsta/martini-contrib/binding",
-			"Comment": "v0.1-33-g9e2ccb8",
-			"Rev": "9e2ccb8ed9db1d45b22e3f552f69253b51b1e869"
-		},
-		{
-			"ImportPath": "github.com/codegangsta/martini-contrib/render",
-			"Comment": "v0.1-33-g9e2ccb8",
-			"Rev": "9e2ccb8ed9db1d45b22e3f552f69253b51b1e869"
+			"Comment": "v0.1-147-g6b55f66",
+			"Rev": "6b55f66fb550ee38ca12b276ad57ae4338532e21"
 		},
 		{
 			"ImportPath": "github.com/garyburd/redigo/redis",
-			"Rev": "933e59f1797af379095160ca63961442442e8807"
+			"Rev": "deb35f4cb17e96db0da4c53e404e68cc7ba5f921"
 		},
 		{
 			"ImportPath": "github.com/kelseyhightower/envconfig",
-			"Rev": "6ca61633287c0238628ee9dd44d14445ee4be426"
+			"Rev": "0280e33525f5d88edb71638a80b31724153225ba"
+		},
+		{
+			"ImportPath": "github.com/martini-contrib/binding",
+			"Rev": "45264721acb6afffc5044893571683bbf93ea767"
+		},
+		{
+			"ImportPath": "github.com/martini-contrib/render",
+			"Rev": "9cf93fe90caa0eaf363182e92df8281c4f12e16b"
 		}
 	]
 }

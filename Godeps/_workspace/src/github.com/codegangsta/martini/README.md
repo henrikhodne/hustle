@@ -1,6 +1,9 @@
-# Martini [![Build Status](https://drone.io/github.com/codegangsta/martini/status.png)](https://drone.io/github.com/codegangsta/martini/latest) [![GoDoc](https://godoc.org/github.com/codegangsta/martini?status.png)](http://godoc.org/github.com/codegangsta/martini)
+# Martini  [![wercker status](https://app.wercker.com/status/174bef7e3c999e103cacfe2770102266 "wercker status")](https://app.wercker.com/project/bykey/174bef7e3c999e103cacfe2770102266) [![GoDoc](https://godoc.org/github.com/go-martini/martini?status.png)](http://godoc.org/github.com/go-martini/martini)
 
 Martini is a powerful package for quickly writing modular web applications/services in Golang.
+
+Language Translations: [Simplified Chinese (zh_CN)](translations/README_zh_cn.md)
+
 
 ## Getting Started
 
@@ -9,7 +12,7 @@ After installing Go and setting up your [GOPATH](http://golang.org/doc/code.html
 ~~~ go
 package main
 
-import "github.com/codegangsta/martini"
+import "github.com/go-martini/martini"
 
 func main() {
   m := martini.Classic()
@@ -22,7 +25,7 @@ func main() {
 
 Then install the Martini package (**go 1.1** and greater is required):
 ~~~
-go get github.com/codegangsta/martini
+go get github.com/go-martini/martini
 ~~~
 
 Then run your server:
@@ -41,7 +44,7 @@ Watch the [Demo Video](http://martini.codegangsta.io/#demo)
 ## Features
 * Extremely simple to use.
 * Non-intrusive design.
-* Play nice with other Golang packages.
+* Plays nice with other Golang packages.
 * Awesome path matching and routing.
 * Modular design - Easy to add functionality, easy to rip stuff out.
 * Lots of good handlers/middlewares to use.
@@ -49,7 +52,7 @@ Watch the [Demo Video](http://martini.codegangsta.io/#demo)
 * **Fully compatible with the [http.HandlerFunc](http://godoc.org/net/http#HandlerFunc) interface.**
 
 ## More Middleware
-For more middleware and functionality, check out the [martini-contrib](http://github.com/codegangsta/martini-contrib) repository.
+For more middleware and functionality, check out the repositories in the  [martini-contrib](https://github.com/martini-contrib) organization.
 
 ## Table of Contents
 * [Classic Martini](#classic-martini)
@@ -59,21 +62,22 @@ For more middleware and functionality, check out the [martini-contrib](http://gi
   * [Serving Static Files](#serving-static-files)
 * [Middleware Handlers](#middleware-handlers)
   * [Next()](#next)
+* [Martini Env](#martini-env)
 * [FAQ](#faq)
 
 ## Classic Martini
-To get up and running quickly, [martini.Classic()](http://godoc.org/github.com/codegangsta/martini#Classic) provides some reasonable defaults that work well for most web applications:
+To get up and running quickly, [martini.Classic()](http://godoc.org/github.com/go-martini/martini#Classic) provides some reasonable defaults that work well for most web applications:
 ~~~ go
   m := martini.Classic()
   // ... middleware and routing goes here
   m.Run()
 ~~~
 
-Below is some of the functionality [martini.Classic()](http://godoc.org/github.com/codegangsta/martini#Classic) pulls in automatically:
-  * Request/Response Logging - [martini.Logger](http://godoc.org/github.com/codegangsta/martini#Logger)
-  * Panic Recovery - [martini.Recovery](http://godoc.org/github.com/codegangsta/martini#Recovery)
-  * Static File serving - [martini.Static](http://godoc.org/github.com/codegangsta/martini#Static)
-  * Routing - [martini.Router](http://godoc.org/github.com/codegangsta/martini#Router)
+Below is some of the functionality [martini.Classic()](http://godoc.org/github.com/go-martini/martini#Classic) pulls in automatically:
+  * Request/Response Logging - [martini.Logger](http://godoc.org/github.com/go-martini/martini#Logger)
+  * Panic Recovery - [martini.Recovery](http://godoc.org/github.com/go-martini/martini#Recovery)
+  * Static File serving - [martini.Static](http://godoc.org/github.com/go-martini/martini#Static)
+  * Routing - [martini.Router](http://godoc.org/github.com/go-martini/martini#Router)
 
 ### Handlers
 Handlers are the heart and soul of Martini. A handler is basically any kind of callable function:
@@ -108,11 +112,11 @@ m.Get("/", func(res http.ResponseWriter, req *http.Request) { // res and req are
 })
 ~~~
 
-The following services are included with [martini.Classic()](http://godoc.org/github.com/codegangsta/martini#Classic):
+The following services are included with [martini.Classic()](http://godoc.org/github.com/go-martini/martini#Classic):
   * [*log.Logger](http://godoc.org/log#Logger) - Global logger for Martini.
-  * [martini.Context](http://godoc.org/github.com/codegangsta/martini#Context) - http request context.
-  * [martini.Params](http://godoc.org/github.com/codegangsta/martini#Params) - `map[string]string` of named params found by route matching.
-  * [martini.Routes](http://godoc.org/github.com/codegangsta/martini#Routes) - Route helper service.
+  * [martini.Context](http://godoc.org/github.com/go-martini/martini#Context) - http request context.
+  * [martini.Params](http://godoc.org/github.com/go-martini/martini#Params) - `map[string]string` of named params found by route matching.
+  * [martini.Routes](http://godoc.org/github.com/go-martini/martini#Routes) - Route helper service.
   * [http.ResponseWriter](http://godoc.org/net/http/#ResponseWriter) - http Response writer interface.
   * [*http.Request](http://godoc.org/net/http/#Request) - http Request.
 
@@ -152,7 +156,7 @@ m.NotFound(func() {
 Routes are matched in the order they are defined. The first route that
 matches the request is invoked.
 
-Route patterns may include named parameters, accessible via the [martini.Params](http://godoc.org/github.com/codegangsta/martini#Params) service:
+Route patterns may include named parameters, accessible via the [martini.Params](http://godoc.org/github.com/go-martini/martini#Params) service:
 ~~~ go
 m.Get("/hello/:name", func(params martini.Params) string {
   return "Hello " + params["name"]
@@ -173,6 +177,26 @@ m.Get("/secret", authorize, func() {
 })
 ~~~
 
+Route groups can be added too using the Group method.
+~~~ go
+m.Group("/books", func(r martini.Router) {
+    r.Get("/:id", GetBooks)
+    r.Post("/new", NewBook)
+    r.Put("/update/:id", UpdateBook)
+    r.Delete("/delete/:id", DeleteBook)
+})
+~~~
+
+Just like you can pass middlewares to a handler you can pass middlewares to groups.
+~~~ go
+m.Group("/books", func(r martini.Router) {
+    r.Get("/:id", GetBooks)
+    r.Post("/new", NewBook)
+    r.Put("/update/:id", UpdateBook)
+    r.Delete("/delete/:id", DeleteBook)
+}, MyMiddleware1, MyMiddleware2)
+~~~
+
 ### Services
 Services are objects that are available to be injected into a Handler's argument list. You can map a service on a *Global* or *Request* level.
 
@@ -187,7 +211,7 @@ m.Run()
 ~~~
 
 #### Request-Level Mapping
-Mapping on the request level can be done in a handler via [martini.Context](http://godoc.org/github.com/codegangsta/martini#Context):
+Mapping on the request level can be done in a handler via [martini.Context](http://godoc.org/github.com/go-martini/martini#Context):
 ~~~ go
 func MyCustomLoggerHandler(c martini.Context, req *http.Request) {
   logger := &MyCustomLogger{req}
@@ -205,8 +229,8 @@ func WrapResponseWriter(res http.ResponseWriter, c martini.Context) {
 ~~~
 
 ### Serving Static Files
-A [martini.Classic()](http://godoc.org/github.com/codegangsta/martini#Classic) instance automatically serves static files from the "public" directory in the root of your server.
-You can serve from more directories by adding more [martini.Static](http://godoc.org/github.com/codegangsta/martini#Static) handlers.
+A [martini.Classic()](http://godoc.org/github.com/go-martini/martini#Classic) instance automatically serves static files from the "public" directory in the root of your server.
+You can serve from more directories by adding more [martini.Static](http://godoc.org/github.com/go-martini/martini#Static) handlers.
 ~~~ go
 m.Use(martini.Static("assets")) // serve from the "assets" directory as well
 ~~~
@@ -219,7 +243,7 @@ m.Use(func() {
 })
 ~~~
 
-You can have full control over the middleware stack with the `Handlers` function:
+You can have full control over the middleware stack with the `Handlers` function. This will replace any handlers that have been previously set:
 ~~~ go
 m.Handlers(
   Middleware1,
@@ -239,7 +263,7 @@ m.Use(func(res http.ResponseWriter, req *http.Request) {
 ~~~
 
 ### Next()
-[Context.Next()](http://godoc.org/github.com/codegangsta/martini#Context) is an optional function that Middleware Handlers can call to yield the until after the other Handlers have been executed. This works really well for any operations that must happen after an http request:
+[Context.Next()](http://godoc.org/github.com/go-martini/martini#Context) is an optional function that Middleware Handlers can call to yield the until after the other Handlers have been executed. This works really well for any operations that must happen after an http request:
 ~~~ go
 // log before and after a request
 m.Use(func(c martini.Context, log *log.Logger){
@@ -251,20 +275,28 @@ m.Use(func(c martini.Context, log *log.Logger){
 })
 ~~~
 
+## Martini Env
+
+Some Martini handlers make use of the `martini.Env` global variable to provide special functionality for development environments vs production environments. It is reccomended that the `MARTINI_ENV=production` environment variable to be set when deploying a Martini server into a production environment.
+
 ## FAQ
 
 ### Where do I find middleware X?
 
-Start by looking in the [martini-contrib](http://github.com/codegangsta/martini-contrib) package. If it is not there feel free to put up a Pull Request for one.
+Start by looking in the [martini-contrib](https://github.com/martini-contrib) projects. If it is not there feel free to contact a martini-contrib team member about adding a new repo to the organization.
 
-* [auth](https://github.com/codegangsta/martini-contrib/tree/master/auth) - Handlers for authentication.
-* [binding](https://github.com/codegangsta/martini-contrib/tree/master/binding) - Handler for mapping/validating a raw request into a structure.
-* [gzip](https://github.com/codegangsta/martini-contrib/tree/master/gzip) - Handler for adding gzip compress to requests
-* [render](https://github.com/codegangsta/martini-contrib/tree/master/render) - Handler that provides a service for easily rendering JSON and HTML templates.
-* [acceptlang](https://github.com/codegangsta/martini-contrib/tree/master/acceptlang) - Handler for parsing the `Accept-Language` HTTP header.
-* [sessions](https://github.com/codegangsta/martini-contrib/tree/master/sessions) - Handler that provides a Session service.
-* [web](https://github.com/codegangsta/martini-contrib/tree/master/web) - web.go Context compatibility.
-* [strip](https://github.com/codegangsta/martini-contrib/tree/master/strip) - URL Prefix stripping.
+* [auth](https://github.com/martini-contrib/auth) - Handlers for authentication.
+* [binding](https://github.com/martini-contrib/binding) - Handler for mapping/validating a raw request into a structure.
+* [gzip](https://github.com/martini-contrib/gzip) - Handler for adding gzip compress to requests
+* [render](https://github.com/martini-contrib/render) - Handler that provides a service for easily rendering JSON and HTML templates.
+* [acceptlang](https://github.com/martini-contrib/acceptlang) - Handler for parsing the `Accept-Language` HTTP header.
+* [sessions](https://github.com/martini-contrib/sessions) - Handler that provides a Session service.
+* [strip](https://github.com/martini-contrib/strip) - URL Prefix stripping.
+* [method](https://github.com/martini-contrib/method) - HTTP method overriding via Header or form fields.
+* [secure](https://github.com/martini-contrib/secure) - Implements a few quick security wins.
+* [encoder](https://github.com/martini-contrib/encoder) - Encoder service for rendering data in several formats and content negotiation.
+* [cors](https://github.com/martini-contrib/cors) - Handler that enables CORS support.
+* [oauth2](https://github.com/martini-contrib/oauth2) - Handler that provides OAuth 2.0 login for Martini apps. Google Sign-in, Facebook Connect and Github login is supported.
 
 ### How do I integrate with existing servers?
 
@@ -276,7 +308,7 @@ package hello
 
 import (
   "net/http"
-  "github.com/codegangsta/martini"
+  "github.com/go-martini/martini"
 )
 
 func init() {
@@ -290,17 +322,21 @@ func init() {
 
 ### How do I change the port/host?
 
-Martini's `Run` function looks for the PORT environment variable and uses that. Otherwise Martini will default to port 3000.
+Martini's `Run` function looks for the PORT and HOST environment variables and uses those. Otherwise Martini will default to localhost:3000.
 To have more flexibility over port and host, use the `http.ListenAndServe` function instead.
 
 ~~~ go
   m := martini.Classic()
   // ...
-  http.ListenAndServe(":8080", m)
+  log.Fatal(http.ListenAndServe(":8080", m))
 ~~~
 
+### Live code reload?
+
+[gin](https://github.com/codegangsta/gin) and [fresh](https://github.com/pilu/fresh) both live reload martini apps.
+
 ## Contributing
-Martini is meant to be kept tiny and clean. Most contributions should end up in the [martini-contrib](http://github.com/codegangsta/martini-contrib) repository. If you do have a contribution for the core of Martini feel free to put up a Pull Request.
+Martini is meant to be kept tiny and clean. Most contributions should end up in a repository in the [martini-contrib](https://github.com/martini-contrib) organization. If you do have a contribution for the core of Martini feel free to put up a Pull Request.
 
 ## About
 

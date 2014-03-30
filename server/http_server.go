@@ -7,8 +7,8 @@ import (
 	"net/http"
 
 	"github.com/codegangsta/martini"
-	"github.com/codegangsta/martini-contrib/binding"
-	"github.com/codegangsta/martini-contrib/render"
+	"github.com/martini-contrib/binding"
+	"github.com/martini-contrib/render"
 )
 
 type httpServer struct {

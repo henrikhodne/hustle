@@ -46,7 +46,7 @@ save:
 	$(GODEP) save $(HUSTLE_PACKAGE) $(HUSTLE_PACKAGE)/server
 
 fmtpolice:
-	set -e; for f in $(shell git ls-files '*.go'); do gofmt $$f | diff -u $$f - ; done
+	set -e; for f in $(shell git ls-files '*.go' | grep -v Godeps); do gofmt $$f | diff -u $$f - ; done
 
 serve:
 	exec $${GOPATH%%:*}/bin/hustle \

@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/codegangsta/martini"
-	"github.com/codegangsta/martini-contrib/render"
+	"github.com/martini-contrib/render"
 )
 
 // StatsServerMain is the whole shebang for the stats, mannn
